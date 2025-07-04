@@ -1,13 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-//import { useAuth } from "@/components/auth-provider"
+import { useAuth } from "@/components/auth-provider"
 import { FcGoogle } from "react-icons/fc"
 import { LucideImage } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Home() {
-  //const { signIn, isLoading } = useAuth()
+  const { signInWithGoogle, signOut, user, loading } = useAuth()
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -30,11 +30,20 @@ export default function Home() {
               Automatically detect and remove duplicate or similar photos to free up space and keep your library
               organized.
             </p>
-            {/* TODO: Authentication to be added */}
-            <Button size="lg" onClick={() => {}} disabled={false} className="gap-2">
-              <FcGoogle className="h-5 w-5" />
-              Sign in with Google
-            </Button>
+            {user ? (
+              <div className="text-center">
+                <p className="text-lg">Welcome, {user.email}!</p>
+                <p className="text-muted-foreground">You're ready to start organizing your photos.</p>
+                <Button size="lg" onClick={signOut} className="mt-4">
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Button size="lg" onClick={signInWithGoogle} disabled={loading} className="gap-2">
+                <FcGoogle className="h-5 w-5" />
+                Sign in with Google
+              </Button>
+            )}
           </div>
         </section>
         <section className="container py-12 md:py-24 lg:py-32 border-t">
