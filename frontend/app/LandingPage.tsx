@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { FcGoogle } from "react-icons/fc"
 import { LucideImage, Sparkles, Shield, Zap, Users, Star, ArrowRight, CheckCircle, LogOut } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { ThemeToggle } from "@/components/Theme-handling/theme-toggle"
 import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
 
