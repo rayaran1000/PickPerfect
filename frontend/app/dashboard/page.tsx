@@ -7,38 +7,28 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LucideImage, Settings, LogOut, RefreshCw, Check, ArrowLeft, Home } from "lucide-react"
-//import { GooglePhotosConnect } from "@/components/google-photos-connect"
-//import { FolderSelector } from "@/components/folder-selector"
-//import { ScanResults } from "@/components/scan-results"
+import { LucideImage, Settings, LogOut, RefreshCw, Check, Home, Upload, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react"
+import { ThemeToggle } from "@/components/Theme-handling/theme-toggle"
+import { PhotoUpload } from "@/components/Photo-handling/PhotoUpload"
+import { UploadedPhoto } from "@/components/Photo-handling/PhotoHandler"
 
 export default function UserDashboard() {
   const { user, signOut } = useAuth()
   const router = useRouter()
+  
   const [scanStarted, setScanStarted] = useState(false)
   const [scanComplete, setScanComplete] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
-  const [folderSelected, setFolderSelected] = useState(false)
+  const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([])
   const [activeTab, setActiveTab] = useState("connect")
-
-  // Debug: Log user data to see the structure
-  useEffect(() => {
-    if (user) {
-      console.log('User object:', user)
-      console.log('User metadata:', user.user_metadata)
-      console.log('User app metadata:', user.app_metadata)
-    }
-  }, [user])
+  const [currentGroupIndex, setCurrentGroupIndex] = useState(0)
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
 
   // Get user info from Google OAuth using the correct structure
   const userEmail = user?.email
   const userName = user?.user_metadata?.full_name || 
                   user?.user_metadata?.name || 
                   userEmail?.split('@')[0]
-  
-  // Use the correct avatar URL from your metadata
-  const userAvatar = user?.user_metadata?.avatar_url || 
-                    user?.user_metadata?.picture
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -49,16 +39,13 @@ export default function UserDashboard() {
 
   // Auto-advance tabs based on state
   useEffect(() => {
-    if (folderSelected && !scanStarted) {
+    if (uploadedPhotos.length > 0 && !scanStarted) {
       setActiveTab("scan")
     } else if (scanComplete) {
       setActiveTab("results")
+      resetGroupNavigation()
     }
-  }, [folderSelected, scanStarted, scanComplete])
-
-  const handleFolderSelect = () => {
-    setFolderSelected(true)
-  }
+  }, [uploadedPhotos.length, scanStarted, scanComplete])
 
   const startScan = () => {
     setScanStarted(true)
@@ -80,6 +67,65 @@ export default function UserDashboard() {
     await signOut()
     router.push("/")
   }
+
+  const handleStartOver = () => {
+    if (confirm("Are you sure you want to start over? This will discard all current photos and selections.")) {
+      setUploadedPhotos([])
+      setSelectedPhotos(new Set())
+      setCurrentGroupIndex(0)
+      setScanStarted(false)
+      setScanComplete(false)
+      setScanProgress(0)
+      setActiveTab("connect")
+    }
+  }
+
+  // Helper functions for group management
+  const totalGroups = Math.ceil(uploadedPhotos.length / 3)
+  const currentGroupPhotos = uploadedPhotos.slice(currentGroupIndex * 3, (currentGroupIndex + 1) * 3)
+  
+  const handlePhotoSelection = (photoId: string, selected: boolean) => {
+    const newSelected = new Set(selectedPhotos)
+    if (selected) {
+      newSelected.add(photoId)
+    } else {
+      newSelected.delete(photoId)
+    }
+    setSelectedPhotos(newSelected)
+  }
+
+  const handleSelectAllInGroup = () => {
+    const newSelected = new Set(selectedPhotos)
+    currentGroupPhotos.forEach(photo => newSelected.add(photo.id))
+    setSelectedPhotos(newSelected)
+  }
+
+  const handleClearAllInGroup = () => {
+    const newSelected = new Set(selectedPhotos)
+    currentGroupPhotos.forEach(photo => newSelected.delete(photo.id))
+    setSelectedPhotos(newSelected)
+  }
+
+  const goToNextGroup = () => {
+    if (currentGroupIndex < totalGroups - 1) {
+      setCurrentGroupIndex(currentGroupIndex + 1)
+    }
+  }
+
+  const goToPreviousGroup = () => {
+    if (currentGroupIndex > 0) {
+      setCurrentGroupIndex(currentGroupIndex - 1)
+    }
+  }
+
+  const resetGroupNavigation = () => {
+    setCurrentGroupIndex(0)
+    setSelectedPhotos(new Set())
+  }
+
+
+
+
 
   // Show loading while checking auth
   if (!user) {
@@ -117,6 +163,7 @@ export default function UserDashboard() {
             <div className="flex items-center gap-2">
               <span className="hidden md:inline text-sm">{user.email}</span>
             </div>
+            <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="h-5 w-5" />
             </Button>
@@ -132,11 +179,11 @@ export default function UserDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="connect" disabled={activeTab !== "connect" && folderSelected}>
+            <TabsTrigger value="connect" disabled={activeTab !== "connect" && uploadedPhotos.length > 0}>
               Connect
             </TabsTrigger>
-            <TabsTrigger value="select" disabled={!folderSelected || (activeTab !== "select" && scanStarted)}>
-              Select Folder
+            <TabsTrigger value="select" disabled={uploadedPhotos.length === 0 || (activeTab !== "select" && scanStarted)}>
+              Select Photos ({uploadedPhotos.length})
             </TabsTrigger>
             <TabsTrigger value="scan" disabled={!scanStarted || (activeTab !== "scan" && scanComplete)}>
               Scan Photos
@@ -147,68 +194,101 @@ export default function UserDashboard() {
           </TabsList>
 
           <TabsContent value="connect" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Connect Your Photos</CardTitle>
-                <CardDescription>
-                  Choose how you want to connect your photos for analysis
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Card className="p-6 border-dashed border-2 hover:border-primary transition-colors cursor-pointer">
-                    <div className="text-center space-y-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                        <LucideImage className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Upload Photos</h3>
-                        <p className="text-sm text-muted-foreground">Upload photos directly from your device</p>
-                      </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Upload Photos Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5" />
+                    Upload Photos
+                  </CardTitle>
+                  <CardDescription>
+                    Select photos from your local device to analyze
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <PhotoUpload 
+                    onPhotosChange={setUploadedPhotos}
+                    maxPhotos={50}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Google Drive Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Connect Google Drive
+                  </CardTitle>
+                  <CardDescription>
+                    Access and select photos from your Google Drive
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <svg className="h-6 w-6 text-primary" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                      </svg>
                     </div>
-                  </Card>
-                  <Card className="p-6 border-dashed border-2 hover:border-primary transition-colors cursor-pointer">
-                    <div className="text-center space-y-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                        <LucideImage className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Google Drive</h3>
-                        <p className="text-sm text-muted-foreground">Connect your Google Drive account</p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleFolderSelect} className="w-full">
-                  Continue with Upload
-                </Button>
-              </CardFooter>
-            </Card>
+                    <h3 className="font-medium mb-2">Connect Your Google Drive</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Securely access your photos stored in Google Drive
+                    </p>
+                    <Button className="w-full">
+                      Connect Google Drive
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground text-center">
+                    We only access photos you explicitly select. Your data remains private.
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="select" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Select Photos to Analyze</CardTitle>
+                <CardTitle>Selected Photos ({uploadedPhotos.length})</CardTitle>
                 <CardDescription>
-                  Choose which photos you want to scan for duplicates
+                  Review and manage the photos you've selected for analysis
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                  <LucideImage className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground mb-4">
-                    Click to select photos or drag and drop them here
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    {uploadedPhotos.length} photos selected for analysis. 
+                    You'll be able to preview and review them after the scan is complete.
                   </p>
-                  <Button variant="outline">
-                    Select Photos
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    Total size: {uploadedPhotos.reduce((acc, photo) => acc + parseFloat(photo.size.replace(' MB', '')), 0).toFixed(1)} MB
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setActiveTab("connect")}
+                  >
+                    Add More Photos
                   </Button>
                 </div>
               </CardContent>
               <CardFooter>
-                <Button onClick={() => setActiveTab("scan")} className="w-full">
+                <Button 
+                  onClick={() => setActiveTab("scan")} 
+                  disabled={uploadedPhotos.length === 0}
+                  className="w-full"
+                >
                   Start Analysis
                 </Button>
               </CardFooter>
@@ -219,7 +299,9 @@ export default function UserDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Scan for Similar Photos</CardTitle>
-                <CardDescription>Our AI will analyze your photos to find duplicates and similar images</CardDescription>
+                <CardDescription>
+                  Our AI will analyze {uploadedPhotos.length} photos to find duplicates and similar images
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {scanStarted ? (
@@ -242,8 +324,8 @@ export default function UserDashboard() {
                       <RefreshCw className="h-8 w-8 text-primary" />
                     </div>
                     <p className="text-center max-w-md text-muted-foreground">
-                      Click the button below to start scanning your selected folder for similar photos. This process may
-                      take a few minutes depending on the number of photos.
+                      Click the button below to start scanning your {uploadedPhotos.length} selected photos for similar images. 
+                      This process may take a few minutes depending on the number of photos.
                     </p>
                   </div>
                 )}
@@ -268,41 +350,123 @@ export default function UserDashboard() {
 
           <TabsContent value="results" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Review & Clean Results</CardTitle>
-                <CardDescription>
-                  Review the similar photos found and choose which ones to keep or remove
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center py-8">
-                  <Check className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Analysis Complete!</h3>
-                  <p className="text-muted-foreground">
-                    Found 24 similar photos organized in 8 groups. 
-                    Review each group and select which photos to keep.
-                  </p>
+                            <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Review & Clean Results</CardTitle>
+                    <CardDescription>
+                      Review each group of similar photos and choose which ones to keep
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleStartOver}
+                    className="gap-2"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Start Over
+                  </Button>
                 </div>
-                <div className="grid gap-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium">Group {i + 1}</h4>
-                          <p className="text-sm text-muted-foreground">3 similar photos found</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Progress indicator */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    Group {currentGroupIndex + 1} of {totalGroups}
+                  </span>
+                  <div className="flex gap-2">
+                    {[...Array(totalGroups)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-2 h-2 rounded-full ${
+                          i === currentGroupIndex ? 'bg-primary' : 'bg-muted'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Group content */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Group {currentGroupIndex + 1}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {currentGroupPhotos.length} similar photos found
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleSelectAllInGroup}
+                      >
+                        Select All
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleClearAllInGroup}
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Photos grid */}
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {currentGroupPhotos.map((photo, photoIndex) => (
+                      <div key={photo.id} className="relative group">
+                        <div className="relative">
+                          <img
+                            src={photo.preview}
+                            alt={photo.name}
+                            className="w-full h-auto max-h-64 object-contain rounded-lg"
+                          />
+                          <div className="absolute top-2 right-2">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              checked={selectedPhotos.has(photo.id)}
+                              onChange={(e) => handlePhotoSelection(photo.id, e.target.checked)}
+                            />
+                          </div>
                         </div>
-                        <Button variant="outline" size="sm">
-                          Review Group
-                        </Button>
+                        <div className="mt-2">
+                          <p className="text-sm font-medium truncate">{photo.name}</p>
+                          <p className="text-xs text-muted-foreground">{photo.size}</p>
+                        </div>
                       </div>
-                    </Card>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button className="w-full">
-                  Clean Up Photos
+              <CardFooter className="flex justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={goToPreviousGroup}
+                  disabled={currentGroupIndex === 0}
+                  className="gap-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous Group
                 </Button>
+                <div className="flex gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center">
+                    {selectedPhotos.size} photos selected
+                  </span>
+                </div>
+                {currentGroupIndex === totalGroups - 1 ? (
+                  <Button>
+                    Clean Up Photos
+                  </Button>
+                ) : (
+                  <Button onClick={goToNextGroup} className="gap-2">
+                    Next Group
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           </TabsContent>
