@@ -6,6 +6,9 @@ export interface UploadedPhoto {
   preview: string
   name: string
   size: string
+  // Add optional Drive-specific properties
+  driveFileId?: string
+  driveDownloadUrl?: string
 }
 
 export interface PhotoHandlerReturn {
