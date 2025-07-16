@@ -3,3 +3,18 @@ flask-cors
 flask-sqlalchemy
 psycopg2-binary
 python-dotenv
+# AI and Image Processing
+transformers
+torch
+torchvision
+opencv-python
+Pillow
+numpy
+scikit-image
+scikit-learn
+# HTTP requests for API calls
+requests
+# File handling
+python-multipart
+# Utilities
+tqdm
