@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { apiService } from '@/lib/api'
 
 interface AuthContextType {
   user: User | null
@@ -20,6 +21,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Only proceed if Supabase is configured
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -40,6 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signInWithGoogle = async () => {
+    if (!supabase) {
+      console.error('Supabase not configured')
+      return
+    }
+    
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -58,7 +70,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    if (!supabase) {
+      console.error('Supabase not configured')
+      return
+    }
+    
     try {
+      // Clean up user files before signing out
+      if (user?.id) {
+        try {
+          await apiService.cleanupUserFiles(user.id)
+          console.log('User files cleaned up successfully')
+        } catch (error) {
+          console.error('Error cleaning up user files:', error)
+          // Continue with logout even if cleanup fails
+        }
+      }
+
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut()
       if (error) throw error
     } catch (error) {
