@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Upload, X, FileImage, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { Upload, Loader2, CheckCircle, AlertCircle } from "lucide-react"
 import { UploadedPhoto, usePhotoHandler } from "@/components/Photo-handling/PhotoHandler"
 import { useEffect, useState } from "react"
 import { apiService, UploadResponse, AnalysisResult } from "@/lib/api"
@@ -19,8 +19,6 @@ export function PhotoUpload({ onPhotosChange, onAnalysisComplete, maxPhotos, cla
     uploadedPhotos,
     fileInputRef,
     handleFileSelect,
-    removePhoto,
-    getPhotoCount,
     triggerFileSelect,
     clearAllPhotos
   } = usePhotoHandler()
@@ -177,39 +175,86 @@ export function PhotoUpload({ onPhotosChange, onAnalysisComplete, maxPhotos, cla
             </div>
           )}
 
-          {/* Upload Area */}
-          <div 
-            className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
-            onClick={triggerFileSelect}
-          >
-            <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground mb-2">
-              Click to select photos or drag and drop them here
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Supports: JPG, PNG, GIF, WebP, BMP, TIFF
-            </p>
-          </div>
+          {/* Upload Area - Only show when no photos uploaded */}
+          {!uploadSuccess && (
+            <>
+              <div 
+                className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                onClick={triggerFileSelect}
+              >
+                <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground mb-2">
+                  Click to select photos or drag and drop them here
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Supports: JPG, PNG, GIF, WebP, BMP, TIFF
+                </p>
+              </div>
 
-          {/* Hidden file input */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleFileSelectWithLimit}
-            className="hidden"
-          />
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileSelectWithLimit}
+                className="hidden"
+              />
+            </>
+          )}
 
-          {/* Photo Count Display */}
-          {uploadedPhotos.length > 0 && (
+          {/* Photo Preview Grid - Show when photos are uploaded */}
+          {uploadSuccess && uploadedPhotos.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">Uploaded Photos ({uploadedPhotos.length})</h4>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={startAnalysis}
+                    disabled={isAnalyzing}
+                    size="sm"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      'Start AI Analysis'
+                    )}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleStartOver}>
+                    Start Over
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {uploadedPhotos.map((photo) => (
+                  <div key={photo.id} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden border bg-transparent">
+                      <img
+                        src={photo.preview}
+                        alt={photo.name}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <div className="mt-2">
+                      <p className="text-sm font-medium truncate">{photo.name}</p>
+                      <p className="text-xs text-muted-foreground">{photo.size}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Photo Count Display - Only show when photos selected but not uploaded */}
+          {uploadedPhotos.length > 0 && !uploadSuccess && (
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h4 className="font-medium">Selected Photos ({uploadedPhotos.length})</h4>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={triggerFileSelect}>
-                    Add More
-                  </Button>
                   <Button variant="outline" size="sm" onClick={handleStartOver}>
                     Clear All
                   </Button>
@@ -257,7 +302,7 @@ export function PhotoUpload({ onPhotosChange, onAnalysisComplete, maxPhotos, cla
 
               {/* Action Buttons */}
               <div className="flex gap-2">
-                {!uploadSuccess ? (
+                {!uploadSuccess && (
                   <Button 
                     onClick={uploadToBackend}
                     disabled={isUploading || uploadedPhotos.length === 0}
@@ -270,21 +315,6 @@ export function PhotoUpload({ onPhotosChange, onAnalysisComplete, maxPhotos, cla
                       </>
                     ) : (
                       'Upload Photos'
-                    )}
-                  </Button>
-                ) : (
-                  <Button 
-                    onClick={startAnalysis}
-                    disabled={isAnalyzing}
-                    className="flex-1"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      'Start AI Analysis'
                     )}
                   </Button>
                 )}
