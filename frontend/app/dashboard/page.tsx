@@ -15,7 +15,7 @@ import { AnalysisResult, apiService } from "@/lib/api"
 
 interface PhotoGroup {
   id: string
-  type: 'duplicate' | 'similar'
+  type: 'duplicate' | 'similar' | 'unique'
   images: Array<{
     path: string
     filename: string
@@ -83,11 +83,11 @@ export default function UserDashboard() {
       type: group.type,
       images: group.images.map(img => ({
         ...img,
-        filename: img.path.split('/').pop() || 'unknown'
+        filename: img.path.split(/[/\\]/).pop() || 'unknown' // Handle both / and \ separators
       })),
       best_image: {
         ...group.best_image,
-        filename: group.best_image.path.split('/').pop() || 'unknown'
+        filename: group.best_image.path.split(/[/\\]/).pop() || 'unknown' // Handle both / and \ separators
       },
       count: group.count,
       similarity_score: group.similarity_score
@@ -384,8 +384,9 @@ export default function UserDashboard() {
                     <CardDescription>
                       {analysisResult && (
                         <>
-                          Found {analysisResult.result.statistics.duplicate_count} duplicates and{' '}
-                          {analysisResult.result.statistics.similar_count} similar photos in {totalGroups} groups.
+                          Found {analysisResult.result.statistics.duplicate_count} duplicates,{' '}
+                          {analysisResult.result.statistics.similar_count} similar photos, and{' '}
+                          {analysisResult.result.statistics.unique_count || 0} unique photos in {totalGroups} groups.
                           {analysisResult.result.statistics.estimated_space_saved_mb > 0 && 
                             ` You could save ${analysisResult.result.statistics.estimated_space_saved_mb.toFixed(1)} MB of space.`
                           }
@@ -440,8 +441,10 @@ export default function UserDashboard() {
                               Group {currentGroupIndex + 1} - {currentGroup.type}
                             </h4>
                             <p className="text-sm text-muted-foreground">
-                              {currentGroup.count} similar photos found 
-                              ({(currentGroup.similarity_score * 100).toFixed(0)}% similar)
+                              {currentGroup.type === 'unique' 
+                                ? '1 unique photo found'
+                                : `${currentGroup.count} ${currentGroup.type} photos found (${(currentGroup.similarity_score * 100).toFixed(0)}% similar)`
+                              }
                             </p>
                           </div>
                           <div className="flex gap-2">
@@ -495,7 +498,6 @@ export default function UserDashboard() {
                                 )}
                               </div>
                               <div className="mt-2">
-                                <p className="text-sm font-medium truncate">{photo.filename}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {(photo.file_size / (1024 * 1024)).toFixed(1)} MB • {(photo.quality.overall_score * 100).toFixed(0)}% quality
                                 </p>

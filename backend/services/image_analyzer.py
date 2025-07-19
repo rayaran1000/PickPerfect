@@ -2,10 +2,6 @@ import os
 import cv2
 import numpy as np
 from PIL import Image
-import torch
-from transformers import AutoImageProcessor, AutoModel
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.cluster import DBSCAN
 import requests
 from typing import List, Dict, Tuple, Optional
 import json
@@ -16,15 +12,7 @@ from urllib.parse import urlparse
 
 class ImageAnalyzer:
     def __init__(self):
-        """Initialize the AI-powered image analyzer"""
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        
-        # Load pre-trained model for feature extraction (using a lightweight model)
-        self.model_name = "microsoft/resnet-50"  # Free to use, good for feature extraction
-        self.processor = AutoImageProcessor.from_pretrained(self.model_name)
-        self.model = AutoModel.from_pretrained(self.model_name).to(self.device)
-        self.model.eval()
-        
+        """Initialize the image analyzer"""
         # Image quality assessment parameters
         self.quality_weights = {
             'resolution': 0.3,
@@ -50,27 +38,7 @@ class ImageAnalyzer:
             print(f"Error downloading image from {url}: {e}")
             raise
     
-    def extract_features(self, image_path: str) -> np.ndarray:
-        """Extract deep features from an image using AI model"""
-        try:
-            # Load and preprocess image
-            image = Image.open(image_path).convert('RGB')
-            inputs = self.processor(images=image, return_tensors="pt").to(self.device)
-            
-            # Extract features
-            with torch.no_grad():
-                outputs = self.model(**inputs)
-                # Use the last hidden state as features
-                features = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
-            
-            return features.flatten()
-        except Exception as e:
-            print(f"Error extracting features from {image_path}: {e}")
-            return np.zeros(2048)  # Default feature vector for ResNet-50
-    
-    def calculate_similarity(self, features1: np.ndarray, features2: np.ndarray) -> float:
-        """Calculate cosine similarity between two feature vectors"""
-        return cosine_similarity([features1], [features2])[0][0]
+
     
     def assess_image_quality(self, image_path: str) -> Dict[str, float]:
         """Assess image quality using multiple metrics"""
@@ -128,79 +96,112 @@ class ImageAnalyzer:
             print(f"Error assessing quality for {image_path}: {e}")
             return {'overall_score': 0.0}
     
-    def group_similar_images_from_urls(self, image_urls: List[str], similarity_threshold: float = 0.85) -> List[List[int]]:
-        """Group similar images using AI features and clustering from URLs"""
+
+    
+
+    
+
+    
+    def calculate_pixel_similarity(self, image_path1: str, image_path2: str, resize_to: tuple = (64, 64)) -> float:
+        """Calculate pixel-by-pixel similarity between two images"""
         try:
-            # Download and extract features for all images
-            print("Downloading and extracting features from images...")
-            features = []
-            valid_indices = []
-            temp_files = []
+            # Load images
+            img1 = cv2.imread(image_path1)
+            img2 = cv2.imread(image_path2)
             
-            for i, url in enumerate(image_urls):
-                try:
-                    temp_file = self.download_image_from_url(url)
-                    temp_files.append(temp_file)
-                    
-                    feature = self.extract_features(temp_file)
-                    features.append(feature)
-                    valid_indices.append(i)
-                except Exception as e:
-                    print(f"Warning: Could not process image {url}: {e}")
-                    continue
+            if img1 is None or img2 is None:
+                return 0.0
             
-            if not features:
-                return []
+            # Resize images to same size for comparison
+            img1_resized = cv2.resize(img1, resize_to)
+            img2_resized = cv2.resize(img2, resize_to)
             
-            features = np.array(features)
+            # Convert to grayscale for better comparison
+            gray1 = cv2.cvtColor(img1_resized, cv2.COLOR_BGR2GRAY)
+            gray2 = cv2.cvtColor(img2_resized, cv2.COLOR_BGR2GRAY)
             
-            # Use DBSCAN clustering to group similar images
-            # Convert similarity threshold to distance threshold
-            distance_threshold = 1 - similarity_threshold
+            # Calculate Mean Squared Error (MSE)
+            mse = np.mean((gray1.astype(float) - gray2.astype(float)) ** 2)
             
-            clustering = DBSCAN(
-                eps=distance_threshold,
-                min_samples=2,  # At least 2 images to form a group
-                metric='cosine'
-            ).fit(features)
+            # Convert MSE to similarity score (0-1)
+            # Lower MSE = higher similarity
+            max_mse = 255 ** 2  # Maximum possible MSE
+            similarity = 1.0 - (mse / max_mse)
             
-            # Group images by cluster
-            labels = clustering.labels_
-            groups = {}
-            
-            for i, label in enumerate(labels):
-                if label >= 0:  # Skip noise points (label = -1)
-                    if label not in groups:
-                        groups[label] = []
-                    groups[label].append(valid_indices[i])
-            
-            # Clean up temporary files
-            for temp_file in temp_files:
-                try:
-                    os.unlink(temp_file)
-                except:
-                    pass
-            
-            return list(groups.values())
+            return max(0.0, similarity)
             
         except Exception as e:
-            print(f"Error grouping images: {e}")
+            print(f"Error calculating pixel similarity: {e}")
+            return 0.0
+    
+    def group_similar_images_local(self, image_paths: List[str], similarity_threshold: float = 0.96) -> List[List[int]]:
+        """Group similar images using pixel-by-pixel comparison"""
+        try:
+            print("Grouping images using pixel-by-pixel comparison...")
+            
+            if len(image_paths) < 2:
+                return []
+            
+            # Initialize groups
+            groups = []
+            processed = set()
+            
+            # Compare each image with every other image
+            for i in range(len(image_paths)):
+                if i in processed:
+                    continue
+                
+                # Start a new group with current image
+                current_group = [i]
+                processed.add(i)
+                
+                # Compare with all remaining images
+                for j in range(i + 1, len(image_paths)):
+                    if j in processed:
+                        continue
+                    
+                    try:
+                        # Calculate pixel similarity
+                        similarity = self.calculate_pixel_similarity(image_paths[i], image_paths[j])
+                        
+                        if similarity >= similarity_threshold:
+                            current_group.append(j)
+                            processed.add(j)
+                            print(f"Images {i} and {j} are {similarity:.2%} similar - grouped together")
+                        else:
+                            print(f"Images {i} and {j} are {similarity:.2%} similar - kept separate")
+                            
+                    except Exception as e:
+                        print(f"Error comparing images {i} and {j}: {e}")
+                        continue
+                
+                # Add the group (even if it's just one image)
+                groups.append(current_group)
+            
+            print(f"Pixel comparison created {len(groups)} groups")
+            return groups
+            
+        except Exception as e:
+            print(f"Error grouping local images: {e}")
             return []
     
-    def analyze_images_from_urls(self, image_urls: List[str], files_data: List[Dict]) -> Dict:
-        """Complete image analysis pipeline from URLs"""
+    def analyze_images_local(self, image_paths: List[str]) -> Dict:
+        """Complete image analysis pipeline for local files"""
         try:
-            print(f"Starting analysis of {len(image_urls)} images from URLs...")
+            print(f"Starting analysis of {len(image_paths)} local images...")
             
-            if not image_urls:
+            if not image_paths:
                 return {
-                    'error': 'No valid image URLs found',
+                    'error': 'No valid image paths found',
                     'groups': [],
                     'statistics': {}
                 }
             
             # Group similar images
-            groups = self.group_similar_images_from_urls(image_urls)
+            groups = self.group_similar_images_local(image_paths)
+            
+            # Track which images have been processed
+            processed_indices = set()
             
             # Analyze each group
             analyzed_groups = []
@@ -209,31 +210,26 @@ class ImageAnalyzer:
             estimated_space_saved = 0
             
             for group_idx, group_indices in enumerate(groups):
-                group_urls = [image_urls[i] for i in group_indices]
-                group_files = [files_data[i] for i in group_indices]
+                group_paths = [image_paths[i] for i in group_indices]
+                
+                # Mark these indices as processed
+                processed_indices.update(group_indices)
                 
                 # Assess quality of each image in the group
                 quality_scores = []
-                for i, url in enumerate(group_urls):
+                for i, image_path in enumerate(group_paths):
                     try:
-                        temp_file = self.download_image_from_url(url)
-                        quality = self.assess_image_quality(temp_file)
-                        
-                        # Clean up temp file
-                        try:
-                            os.unlink(temp_file)
-                        except:
-                            pass
+                        quality = self.assess_image_quality(image_path)
+                        file_size = os.path.getsize(image_path)
                         
                         quality_scores.append({
-                            'path': group_files[i]['path'],
-                            'url': url,
-                            'filename': group_files[i]['filename'],
+                            'path': image_path,
+                            'filename': os.path.basename(image_path),
                             'quality': quality,
-                            'file_size': group_files[i]['size']
+                            'file_size': file_size
                         })
                     except Exception as e:
-                        print(f"Error processing image {url}: {e}")
+                        print(f"Error processing image {image_path}: {e}")
                         continue
                 
                 if not quality_scores:
@@ -261,17 +257,54 @@ class ImageAnalyzer:
                     'images': quality_scores,
                     'best_image': best_image,
                     'count': len(quality_scores),
-                    'similarity_score': 0.9  # Placeholder, could be calculated from features
+                    'similarity_score': 0.90  # Placeholder, could be calculated from features
                 }
                 
                 analyzed_groups.append(analyzed_group)
             
+            # Add individual images that weren't grouped (unique images)
+            for i, image_path in enumerate(image_paths):
+                if i not in processed_indices:
+                    try:
+                        quality = self.assess_image_quality(image_path)
+                        file_size = os.path.getsize(image_path)
+                        
+                        quality_score = {
+                            'path': image_path,
+                            'filename': os.path.basename(image_path),
+                            'quality': quality,
+                            'file_size': file_size
+                        }
+                        
+                        analyzed_group = {
+                            'id': f'group_{len(analyzed_groups)}',
+                            'type': 'unique',
+                            'images': [quality_score],
+                            'best_image': quality_score,
+                            'count': 1,
+                            'similarity_score': 1.0  # Unique image
+                        }
+                        
+                        analyzed_groups.append(analyzed_group)
+                        
+                    except Exception as e:
+                        print(f"Error processing unique image {image_path}: {e}")
+                        continue
+            
+            # Sort groups by number of images in descending order (largest groups first)
+            analyzed_groups.sort(key=lambda x: x['count'], reverse=True)
+            
+            # Reassign group IDs to maintain order
+            for i, group in enumerate(analyzed_groups):
+                group['id'] = f'group_{i}'
+            
             # Calculate statistics
             statistics = {
-                'total_images': len(image_urls),
+                'total_images': len(image_paths),
                 'total_groups': len(analyzed_groups),
                 'duplicate_count': total_duplicates,
                 'similar_count': total_similar,
+                'unique_count': len(analyzed_groups) - total_duplicates - total_similar,
                 'estimated_space_saved_bytes': estimated_space_saved,
                 'estimated_space_saved_mb': estimated_space_saved / (1024 * 1024)
             }
@@ -283,7 +316,7 @@ class ImageAnalyzer:
             }
             
         except Exception as e:
-            print(f"Error in image analysis: {e}")
+            print(f"Error in local image analysis: {e}")
             return {
                 'error': str(e),
                 'groups': [],
@@ -291,6 +324,5 @@ class ImageAnalyzer:
             }
     
     def analyze_images(self, image_paths: List[str]) -> Dict:
-        """Legacy method for local file analysis (kept for compatibility)"""
-        # This method can be removed if you're fully migrating to URL-based analysis
-        return self.analyze_images_from_urls(image_paths, [{'path': path, 'filename': os.path.basename(path), 'size': 0} for path in image_paths]) 
+        """Main entry point for image analysis"""
+        return self.analyze_images_local(image_paths)

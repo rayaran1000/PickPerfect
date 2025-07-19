@@ -127,7 +127,7 @@ def analyze_images():
         # Start analysis in a separate thread to avoid blocking
         def run_analysis():
             try:
-                result = image_analyzer.analyze_images(image_files)
+                result = image_analyzer.analyze_images_local(image_files)
                 analysis_results[session_id] = result
             except Exception as e:
                 analysis_results[session_id] = {'error': str(e)}
