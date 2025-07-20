@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LucideImage, Settings, LogOut, RefreshCw, Check, Home, Upload, ChevronLeft, ChevronRight, RotateCcw, Brain, Zap } from "lucide-react"
+import { LucideImage, Settings, LogOut, RefreshCw, Check, Home, Upload, ChevronLeft, ChevronRight, RotateCcw, Brain, Zap, Star } from "lucide-react"
 import { ThemeToggle } from "@/components/Theme-handling/theme-toggle"
 import { PhotoUpload } from "@/components/Photo-handling/PhotoUpload"
 import { UploadedPhoto } from "@/components/Photo-handling/PhotoHandler"
+import { AnalysisType } from "@/components/Photo-handling/AnalysisTypeSelector"
 import { AnalysisResult, apiService } from "@/lib/api"
 
 interface PhotoGroup {
@@ -52,6 +53,7 @@ export default function UserDashboard() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [photoGroups, setPhotoGroups] = useState<PhotoGroup[]>([])
   const [sessionId, setSessionId] = useState<string | null>(null)
+  const [analysisType, setAnalysisType] = useState<AnalysisType>('pixel')
 
   // Get user info from Google OAuth using the correct structure
   const userEmail = user?.email
@@ -80,7 +82,7 @@ export default function UserDashboard() {
     // Set the session ID from the analysis result
     setSessionId(result.session_id)
     
-    // Convert backend result to frontend format
+    // Convert backend result to frontend format and sort by importance
     const groups: PhotoGroup[] = result.result.groups.map(group => ({
       id: group.id,
       type: group.type,
@@ -96,7 +98,30 @@ export default function UserDashboard() {
       similarity_score: group.similarity_score
     }))
     
-    setPhotoGroups(groups)
+    // Sort groups in descending order of importance:
+    // 1. Duplicates/similar groups first (more important to review)
+    // 2. Larger groups first (more potential space savings)
+    // 3. Higher similarity scores first (more confident matches)
+    const sortedGroups = groups.sort((a, b) => {
+      // First priority: Group type (duplicates/similar > unique)
+      const typePriority = { 'duplicate': 3, 'similar': 2, 'unique': 1 }
+      const aTypePriority = typePriority[a.type] || 0
+      const bTypePriority = typePriority[b.type] || 0
+      
+      if (aTypePriority !== bTypePriority) {
+        return bTypePriority - aTypePriority // Descending order
+      }
+      
+      // Second priority: Group size (larger groups first)
+      if (a.count !== b.count) {
+        return b.count - a.count // Descending order
+      }
+      
+      // Third priority: Similarity score (higher scores first)
+      return b.similarity_score - a.similarity_score // Descending order
+    })
+    
+    setPhotoGroups(sortedGroups)
   }
 
   const handleSignOut = async () => {
@@ -123,6 +148,7 @@ export default function UserDashboard() {
       setCurrentGroupIndex(0)
       setAnalysisResult(null)
       setPhotoGroups([])
+      setAnalysisType('pixel') // Reset to default analysis type
       setActiveTab("upload")
     }
   }
@@ -205,6 +231,40 @@ export default function UserDashboard() {
     }
   }
 
+  const handleDownloadBestPhotos = async () => {
+    if (!sessionId) {
+      alert("No session found. Please upload photos first.")
+      return
+    }
+
+    if (photoGroups.length === 0) {
+      alert("No photo groups found.")
+      return
+    }
+
+    try {
+      // Get the best photo path from each group
+      const bestPhotoPaths = photoGroups.map(group => group.best_image.path)
+      
+      // Call backend to create download
+      const blob = await apiService.downloadSelectedPhotos(sessionId, bestPhotoPaths)
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `best_photos_${new Date().toISOString().split('T')[0]}.zip`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+    } catch (error) {
+      console.error('Download error:', error)
+      alert('Failed to download best photos. Please try again.')
+    }
+  }
+
   // Show loading while checking auth
   if (!user) {
     return (
@@ -250,9 +310,9 @@ export default function UserDashboard() {
       </header>
       
       <main className="flex-1 container py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">AI Photo Organization</h1>
-          <p className="text-muted-foreground">Upload photos and let AI find duplicates and similar images</p>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-1">Photo Organization</h1>
+          <p className="text-muted-foreground">Upload photos to find duplicates and similar images</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
@@ -269,88 +329,12 @@ export default function UserDashboard() {
           </TabsList>
 
           <TabsContent value="upload" className="space-y-4">
-            <div className="grid gap-6">
-              {/* Upload Photos Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="h-5 w-5" />
-                    Upload Photos for AI Analysis
-                  </CardTitle>
-                  <CardDescription>
-                    Select photos from your device. Our AI will analyze them to find duplicates and similar images.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <PhotoUpload 
-                    onPhotosChange={setUploadedPhotos}
-                    onAnalysisComplete={handleAnalysisComplete}
-                    maxPhotos={50}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* AI Features Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5" />
-                    AI-Powered Features
-                  </CardTitle>
-                  <CardDescription>
-                    What our AI can do for you
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                        <Zap className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Smart Duplicate Detection</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Find exact duplicates and near-identical photos using advanced AI algorithms
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                        <Check className="h-4 w-4 text-green-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Quality Assessment</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Automatically identify the best quality photo in each group
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                        <LucideImage className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Similar Image Grouping</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Group photos with similar content, lighting, and composition
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                        <RefreshCw className="h-4 w-4 text-orange-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Space Optimization</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Calculate potential storage space savings from removing duplicates
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <PhotoUpload
+              onPhotosChange={setUploadedPhotos}
+              onAnalysisComplete={handleAnalysisComplete}
+              onAnalysisTypeChange={setAnalysisType}
+              maxPhotos={50}
+            />
           </TabsContent>
 
           <TabsContent value="processing" className="space-y-4">
@@ -387,9 +371,14 @@ export default function UserDashboard() {
                       </div>
                       <div className="p-4 border rounded-lg text-center">
                         <div className="text-2xl font-bold text-orange-600">
-                          {analysisResult.result.statistics.duplicate_count}
+                          {analysisType === 'ai' 
+                            ? analysisResult.result.statistics.similar_count 
+                            : analysisResult.result.statistics.duplicate_count
+                          }
                         </div>
-                        <div className="text-sm text-muted-foreground">Duplicates</div>
+                        <div className="text-sm text-muted-foreground">
+                          {analysisType === 'ai' ? 'Similar Photos' : 'Duplicates'}
+                        </div>
                       </div>
                       <div className="p-4 border rounded-lg text-center">
                         <div className="text-2xl font-bold text-green-600">
@@ -417,12 +406,16 @@ export default function UserDashboard() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Review & Clean Results</CardTitle>
+                    <CardTitle>
+                      {analysisType === 'ai' ? 'Similar Image' : 'Exact Duplicate'} Analysis Results
+                    </CardTitle>
                     <CardDescription>
                       {analysisResult && (
                         <>
-                          Found {analysisResult.result.statistics.duplicate_count} duplicates,{' '}
-                          {analysisResult.result.statistics.similar_count} similar photos, and{' '}
+                          Found {analysisType === 'ai' 
+                            ? analysisResult.result.statistics.similar_count 
+                            : analysisResult.result.statistics.duplicate_count
+                          } {analysisType === 'ai' ? 'similar photos' : 'duplicates'}, and{' '}
                           {analysisResult.result.statistics.unique_count || 0} unique photos in {totalGroups} groups.
                           {analysisResult.result.statistics.estimated_space_saved_mb > 0 && 
                             ` You could save ${analysisResult.result.statistics.estimated_space_saved_mb.toFixed(1)} MB of space.`
@@ -445,18 +438,25 @@ export default function UserDashboard() {
               <CardContent className="space-y-6">
                 {totalGroups === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground">No similar photos found!</p>
+                    <p className="text-muted-foreground">
+                      No {analysisType === 'ai' ? 'similar photos' : 'duplicates'} found!
+                    </p>
                     <p className="text-sm text-muted-foreground mt-2">
                       All your photos appear to be unique.
                     </p>
                   </div>
                 ) : (
                   <>
-                    {/* Progress indicator */}
+                    {/* Progress indicator and sorting info */}
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Group {currentGroupIndex + 1} of {totalGroups}
-                      </span>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm text-muted-foreground">
+                          Group {currentGroupIndex + 1} of {totalGroups}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Sorted by: {analysisType === 'ai' ? 'Similar' : 'Duplicate'} groups first, then by size
+                        </span>
+                      </div>
                       <div className="flex gap-2">
                         {[...Array(totalGroups)].map((_, i) => (
                           <div
@@ -474,13 +474,28 @@ export default function UserDashboard() {
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h4 className="font-medium">
-                              Group {currentGroupIndex + 1} - {currentGroup.type}
-                            </h4>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium">
+                                Group {currentGroupIndex + 1} - {currentGroup.type}
+                              </h4>
+                              {/* Priority indicator */}
+                              {currentGroup.type !== 'unique' && (
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  currentGroup.count >= 5 
+                                    ? 'bg-red-100 text-red-700' 
+                                    : currentGroup.count >= 3 
+                                      ? 'bg-orange-100 text-orange-700'
+                                      : 'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                  {currentGroup.count >= 5 ? 'High Priority' : 
+                                   currentGroup.count >= 3 ? 'Medium Priority' : 'Low Priority'}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-sm text-muted-foreground">
                               {currentGroup.type === 'unique' 
                                 ? '1 unique photo found'
-                                : `${currentGroup.count} ${currentGroup.type} photos found (${(currentGroup.similarity_score * 100).toFixed(0)}% similar)`
+                                : `${currentGroup.count} ${analysisType === 'ai' ? 'similar' : 'duplicate'} photos found (${(currentGroup.similarity_score * 100).toFixed(0)}% similar)`
                               }
                             </p>
                           </div>
@@ -557,21 +572,32 @@ export default function UserDashboard() {
                   <ChevronLeft className="h-4 w-4" />
                   Previous Group
                 </Button>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-1">
                   <span className="text-sm text-muted-foreground flex items-center">
                     {selectedPhotos.size} photos selected
                   </span>
                 </div>
-                {currentGroupIndex === totalGroups - 1 ? (
-                  <Button onClick={handleDownloadSelected}>
-                    Download Selected Photos
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleDownloadBestPhotos}
+                    className="gap-2"
+                  >
+                    <Star className="h-4 w-4" />
+                    Download Best Photos Only
                   </Button>
-                ) : (
-                  <Button onClick={goToNextGroup} className="gap-2">
-                    Next Group
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                )}
+                  {currentGroupIndex === totalGroups - 1 && (
+                    <Button onClick={handleDownloadSelected}>
+                      Download Selected Photos
+                    </Button>
+                  )}
+                  {currentGroupIndex < totalGroups - 1 && (
+                    <Button onClick={goToNextGroup} className="gap-2">
+                      Next Group
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </CardFooter>
             </Card>
           </TabsContent>

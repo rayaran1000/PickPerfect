@@ -15,7 +15,8 @@ from urllib.parse import urlparse
 import tempfile
 
 # Import our services
-from services.image_analyzer import ImageAnalyzer
+from services.pixel_analyzer import PixelAnalyzer
+from services.ai_analyzer import AIAnalyzer
 from services.file_handler import FileHandler
 
 # Load environment variables
@@ -31,7 +32,8 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 # Initialize services
-image_analyzer = ImageAnalyzer()
+pixel_analyzer = PixelAnalyzer()
+ai_analyzer = AIAnalyzer()
 file_handler = FileHandler()
 
 # Store analysis results in memory (in production, use a database)
@@ -126,10 +128,20 @@ def analyze_images():
         if not image_files:
             return jsonify({'error': 'No valid images found in session'}), 400
         
+        # Get analysis type from request (default to pixel-based for backward compatibility)
+        analysis_type = data.get('analysis_type', 'pixel')
+        
+        print(f"Starting {analysis_type.upper()} analysis for session {session_id}")
+        
         # Start analysis in a separate thread to avoid blocking
         def run_analysis():
             try:
-                result = image_analyzer.analyze_images_local(image_files)
+                if analysis_type == 'ai':
+                    print(f"Using AI analyzer for session {session_id}")
+                    result = ai_analyzer.analyze_similar_images(image_files)
+                else:
+                    print(f"Using pixel analyzer for session {session_id}")
+                    result = pixel_analyzer.analyze_exact_duplicates(image_files)
                 analysis_results[session_id] = result
             except Exception as e:
                 analysis_results[session_id] = {'error': str(e)}
@@ -154,10 +166,18 @@ def get_analysis_status(session_id):
     """Get the status of image analysis"""
     try:
         if session_id not in analysis_results:
-            return jsonify({
-                'status': 'not_found',
-                'message': 'Analysis not found for this session'
-            }), 404
+            # Check if session directory exists (analysis might be starting)
+            session_dir = os.path.join(file_handler.upload_folder, session_id)
+            if os.path.exists(session_dir):
+                return jsonify({
+                    'status': 'processing',
+                    'message': 'Analysis starting up...'
+                })
+            else:
+                return jsonify({
+                    'status': 'not_found',
+                    'message': 'Analysis not found for this session'
+                }), 404
         
         result = analysis_results[session_id]
         

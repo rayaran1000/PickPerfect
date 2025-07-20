@@ -2,17 +2,14 @@ import os
 import cv2
 import numpy as np
 from PIL import Image
-import requests
 from typing import List, Dict, Tuple, Optional
 import json
 from datetime import datetime
 import hashlib
-import tempfile
-from urllib.parse import urlparse
 
-class ImageAnalyzer:
+class PixelAnalyzer:
     def __init__(self):
-        """Initialize the image analyzer"""
+        """Initialize the pixel-based image analyzer"""
         # Image quality assessment parameters
         self.quality_weights = {
             'resolution': 0.3,
@@ -21,22 +18,6 @@ class ImageAnalyzer:
             'contrast': 0.15,
             'noise': 0.1
         }
-    
-    def download_image_from_url(self, url: str) -> str:
-        """Download image from URL and save to temporary file"""
-        try:
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-            
-            # Create temporary file
-            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
-            temp_file.write(response.content)
-            temp_file.close()
-            
-            return temp_file.name
-        except Exception as e:
-            print(f"Error downloading image from {url}: {e}")
-            raise
     
     def assess_image_quality(self, image_path: str) -> Dict[str, float]:
         """Assess image quality using multiple metrics"""
@@ -126,10 +107,10 @@ class ImageAnalyzer:
             print(f"Error calculating pixel similarity: {e}")
             return 0.0
     
-    def group_similar_images_local(self, image_paths: List[str], similarity_threshold: float = 0.96) -> List[List[int]]:
-        """Group similar images using pixel-by-pixel comparison"""
+    def group_exact_duplicates(self, image_paths: List[str], similarity_threshold: float = 0.96) -> List[List[int]]:
+        """Group exact duplicate images using pixel-by-pixel comparison"""
         try:
-            print("Grouping images using pixel-by-pixel comparison...")
+            print("Grouping exact duplicates using pixel-by-pixel comparison...")
             
             if len(image_paths) < 2:
                 return []
@@ -159,7 +140,7 @@ class ImageAnalyzer:
                         if similarity >= similarity_threshold:
                             current_group.append(j)
                             processed.add(j)
-                            print(f"Images {i} and {j} are {similarity:.2%} similar - grouped together")
+                            print(f"Images {i} and {j} are {similarity:.2%} similar - grouped as exact duplicates")
                         else:
                             print(f"Images {i} and {j} are {similarity:.2%} similar - kept separate")
                             
@@ -174,13 +155,13 @@ class ImageAnalyzer:
             return groups
             
         except Exception as e:
-            print(f"Error grouping local images: {e}")
+            print(f"Error grouping exact duplicates: {e}")
             return []
     
-    def analyze_images_local(self, image_paths: List[str]) -> Dict:
-        """Complete image analysis pipeline for local files"""
+    def analyze_exact_duplicates(self, image_paths: List[str]) -> Dict:
+        """Complete exact duplicate analysis pipeline"""
         try:
-            print(f"Starting analysis of {len(image_paths)} local images...")
+            print(f"Starting exact duplicate analysis of {len(image_paths)} images...")
             
             if not image_paths:
                 return {
@@ -189,8 +170,8 @@ class ImageAnalyzer:
                     'statistics': {}
                 }
             
-            # Group similar images
-            groups = self.group_similar_images_local(image_paths)
+            # Group exact duplicates
+            groups = self.group_exact_duplicates(image_paths)
             
             # Track which images have been processed
             processed_indices = set()
@@ -198,123 +179,104 @@ class ImageAnalyzer:
             # Analyze each group
             analyzed_groups = []
             total_duplicates = 0
-            total_similar = 0
-            estimated_space_saved = 0
             
-            for group_idx, group_indices in enumerate(groups):
-                group_paths = [image_paths[i] for i in group_indices]
-                
-                # Mark these indices as processed
-                processed_indices.update(group_indices)
-                
-                # Assess quality of each image in the group
-                quality_scores = []
-                for i, image_path in enumerate(group_paths):
-                    try:
+            for group_idx, group in enumerate(groups):
+                if len(group) == 1:
+                    # Single image - no duplicates
+                    image_path = image_paths[group[0]]
+                    quality = self.assess_image_quality(image_path)
+                    
+                    analyzed_groups.append({
+                        'id': f"unique_{group_idx}",
+                        'type': 'unique',
+                        'images': [{
+                            'path': image_path,
+                            'quality': quality,
+                            'file_size': os.path.getsize(image_path)
+                        }],
+                        'best_image': {
+                            'path': image_path,
+                            'quality': quality,
+                            'file_size': os.path.getsize(image_path)
+                        },
+                        'count': 1,
+                        'similarity_score': 1.0
+                    })
+                else:
+                    # Multiple images - duplicates found
+                    group_images = []
+                    best_image = None
+                    best_score = -1
+                    
+                    for img_idx in group:
+                        image_path = image_paths[img_idx]
                         quality = self.assess_image_quality(image_path)
                         file_size = os.path.getsize(image_path)
                         
-                        quality_scores.append({
+                        group_images.append({
                             'path': image_path,
-                            'filename': os.path.basename(image_path),
                             'quality': quality,
                             'file_size': file_size
                         })
-                    except Exception as e:
-                        print(f"Error processing image {image_path}: {e}")
-                        continue
-                
-                if not quality_scores:
-                    continue
-                
-                # Sort by quality score
-                quality_scores.sort(key=lambda x: x['quality']['overall_score'], reverse=True)
-                
-                # Determine group type
-                if len(quality_scores) == 2 and quality_scores[0]['quality']['overall_score'] - quality_scores[1]['quality']['overall_score'] < 0.1:
-                    group_type = 'duplicate'
-                    total_duplicates += len(quality_scores) - 1
-                else:
-                    group_type = 'similar'
-                    total_similar += len(quality_scores) - 1
-                
-                # Calculate space that could be saved
-                best_image = quality_scores[0]
-                for other_image in quality_scores[1:]:
-                    estimated_space_saved += other_image['file_size']
-                
-                analyzed_group = {
-                    'id': f'group_{group_idx}',
-                    'type': group_type,
-                    'images': quality_scores,
-                    'best_image': best_image,
-                    'count': len(quality_scores),
-                    'similarity_score': 0.90  # Placeholder, could be calculated from features
-                }
-                
-                analyzed_groups.append(analyzed_group)
-            
-            # Add individual images that weren't grouped (unique images)
-            for i, image_path in enumerate(image_paths):
-                if i not in processed_indices:
-                    try:
-                        quality = self.assess_image_quality(image_path)
-                        file_size = os.path.getsize(image_path)
                         
-                        quality_score = {
-                            'path': image_path,
-                            'filename': os.path.basename(image_path),
-                            'quality': quality,
-                            'file_size': file_size
-                        }
+                        # Track best image
+                        if quality['overall_score'] > best_score:
+                            best_score = quality['overall_score']
+                            best_image = {
+                                'path': image_path,
+                                'quality': quality,
+                                'file_size': file_size
+                            }
                         
-                        analyzed_group = {
-                            'id': f'group_{len(analyzed_groups)}',
-                            'type': 'unique',
-                            'images': [quality_score],
-                            'best_image': quality_score,
-                            'count': 1,
-                            'similarity_score': 1.0  # Unique image
-                        }
-                        
-                        analyzed_groups.append(analyzed_group)
-                        
-                    except Exception as e:
-                        print(f"Error processing unique image {image_path}: {e}")
-                        continue
-            
-            # Sort groups by number of images in descending order (largest groups first)
-            analyzed_groups.sort(key=lambda x: x['count'], reverse=True)
-            
-            # Reassign group IDs to maintain order
-            for i, group in enumerate(analyzed_groups):
-                group['id'] = f'group_{i}'
+                        processed_indices.add(img_idx)
+                    
+                    total_duplicates += len(group) - 1
+                    
+                    analyzed_groups.append({
+                        'id': f"duplicate_{group_idx}",
+                        'type': 'duplicate',
+                        'images': group_images,
+                        'best_image': best_image,
+                        'count': len(group),
+                        'similarity_score': 0.98  # High similarity for exact duplicates
+                    })
             
             # Calculate statistics
+            total_images = len(image_paths)
+            total_groups = len(analyzed_groups)
+            duplicate_count = sum(1 for group in analyzed_groups if group['type'] == 'duplicate')
+            unique_count = sum(1 for group in analyzed_groups if group['type'] == 'unique')
+            
+            # Calculate space savings
+            estimated_space_saved_bytes = 0
+            for group in analyzed_groups:
+                if group['type'] == 'duplicate' and group['count'] > 1:
+                    # Calculate space saved by keeping only the best image
+                    total_size = sum(img['file_size'] for img in group['images'])
+                    best_size = group['best_image']['file_size']
+                    saved_size = total_size - best_size
+                    estimated_space_saved_bytes += saved_size
+            
             statistics = {
-                'total_images': len(image_paths),
-                'total_groups': len(analyzed_groups),
-                'duplicate_count': total_duplicates,
-                'similar_count': total_similar,
-                'unique_count': len(analyzed_groups) - total_duplicates - total_similar,
-                'estimated_space_saved_bytes': estimated_space_saved,
-                'estimated_space_saved_mb': estimated_space_saved / (1024 * 1024)
+                'total_images': total_images,
+                'total_groups': total_groups,
+                'duplicate_count': duplicate_count,
+                'similar_count': 0,  # No similar images in exact duplicate mode
+                'unique_count': unique_count,
+                'estimated_space_saved_bytes': estimated_space_saved_bytes,
+                'estimated_space_saved_mb': estimated_space_saved_bytes / (1024 * 1024)
             }
             
             return {
+                'success': True,
                 'groups': analyzed_groups,
-                'statistics': statistics,
-                'success': True
+                'statistics': statistics
             }
             
         except Exception as e:
-            print(f"Error in local image analysis: {e}")
+            print(f"Error in exact duplicate analysis: {e}")
             return {
                 'error': str(e),
                 'groups': [],
                 'statistics': {}
-            }
-    
-    def analyze_images(self, image_paths: List[str]) -> Dict:
-        """Main entry point for image analysis"""
-        return self.analyze_images_local(image_paths)
+            } 
