@@ -3,6 +3,8 @@ from flask_cors import CORS
 import os
 import uuid
 import json
+import zipfile
+import io
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -261,6 +263,61 @@ def get_statistics():
             'total_images_analyzed': total_images,
             'active_sessions': total_sessions
         })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/download', methods=['POST'])
+def download_selected_photos():
+    """Download selected photos as a ZIP file"""
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        photo_paths = data.get('photo_paths', [])
+        
+        if not session_id:
+            return jsonify({'error': 'Session ID is required'}), 400
+        
+        if not photo_paths:
+            return jsonify({'error': 'No photos selected for download'}), 400
+        
+        # Create a ZIP file in memory
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for photo_path in photo_paths:
+                try:
+                    # Check if file exists and is within the session directory
+                    if not os.path.exists(photo_path):
+                        print(f"Warning: File not found: {photo_path}")
+                        continue
+                    
+                    # Verify the file is within the session directory for security
+                    session_dir = os.path.join(file_handler.upload_folder, session_id)
+                    if not photo_path.startswith(session_dir):
+                        print(f"Warning: File path outside session directory: {photo_path}")
+                        continue
+                    
+                    # Get the filename for the ZIP
+                    filename = os.path.basename(photo_path)
+                    
+                    # Add file to ZIP
+                    zip_file.write(photo_path, filename)
+                    
+                except Exception as e:
+                    print(f"Error adding file {photo_path} to ZIP: {e}")
+                    continue
+        
+        # Reset buffer position
+        zip_buffer.seek(0)
+        
+        # Return the ZIP file
+        return send_file(
+            zip_buffer,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=f'selected_photos_{session_id}.zip'
+        )
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

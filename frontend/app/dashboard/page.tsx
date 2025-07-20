@@ -77,6 +77,9 @@ export default function UserDashboard() {
   const handleAnalysisComplete = (result: AnalysisResult) => {
     setAnalysisResult(result)
     
+    // Set the session ID from the analysis result
+    setSessionId(result.session_id)
+    
     // Convert backend result to frontend format
     const groups: PhotoGroup[] = result.result.groups.map(group => ({
       id: group.id,
@@ -166,6 +169,40 @@ export default function UserDashboard() {
   const resetGroupNavigation = () => {
     setCurrentGroupIndex(0)
     setSelectedPhotos(new Set())
+  }
+
+  const handleDownloadSelected = async () => {
+    if (selectedPhotos.size === 0) {
+      alert("Please select at least one photo to download")
+      return
+    }
+
+    if (!sessionId) {
+      alert("No session found. Please upload photos first.")
+      return
+    }
+
+    try {
+      // Get the selected photo paths
+      const selectedPhotoPaths = Array.from(selectedPhotos)
+      
+      // Call backend to create download
+      const blob = await apiService.downloadSelectedPhotos(sessionId, selectedPhotoPaths)
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `selected_photos_${new Date().toISOString().split('T')[0]}.zip`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+    } catch (error) {
+      console.error('Download error:', error)
+      alert('Failed to download photos. Please try again.')
+    }
   }
 
   // Show loading while checking auth
@@ -526,8 +563,8 @@ export default function UserDashboard() {
                   </span>
                 </div>
                 {currentGroupIndex === totalGroups - 1 ? (
-                  <Button>
-                    Clean Up Photos
+                  <Button onClick={handleDownloadSelected}>
+                    Download Selected Photos
                   </Button>
                 ) : (
                   <Button onClick={goToNextGroup} className="gap-2">

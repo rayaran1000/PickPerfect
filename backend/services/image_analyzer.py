@@ -38,8 +38,6 @@ class ImageAnalyzer:
             print(f"Error downloading image from {url}: {e}")
             raise
     
-
-    
     def assess_image_quality(self, image_path: str) -> Dict[str, float]:
         """Assess image quality using multiple metrics"""
         try:
@@ -95,12 +93,6 @@ class ImageAnalyzer:
         except Exception as e:
             print(f"Error assessing quality for {image_path}: {e}")
             return {'overall_score': 0.0}
-    
-
-    
-
-    
-
     
     def calculate_pixel_similarity(self, image_path1: str, image_path2: str, resize_to: tuple = (64, 64)) -> float:
         """Calculate pixel-by-pixel similarity between two images"""
