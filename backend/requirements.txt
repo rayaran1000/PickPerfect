@@ -18,3 +18,5 @@ requests
 python-multipart
 # Utilities
 tqdm
+faiss-cpu
+hf_xet
