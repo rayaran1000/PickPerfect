@@ -5,6 +5,10 @@ from PIL import Image
 from typing import List, Dict, Tuple, Optional
 import json
 from datetime import datetime
+import faiss  
+from transformers import CLIPProcessor, CLIPModel 
+import torch
+from .pixel_analyzer import PixelAnalyzer  
 
 class AIAnalyzer:
     def __init__(self):
@@ -18,9 +22,10 @@ class AIAnalyzer:
             'noise': 0.1
         }
         
-        # TODO: Initialize AI models here
-        # self.feature_extractor = None
-        # self.similarity_model = None
+        self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch16")
+        self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch16", use_fast=True)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
     
     def assess_image_quality(self, image_path: str) -> Dict[str, float]:
         """Assess image quality using multiple metrics (same as pixel analyzer)"""
@@ -78,45 +83,129 @@ class AIAnalyzer:
             print(f"Error assessing quality for {image_path}: {e}")
             return {'overall_score': 0.0}
     
-    def extract_features(self, image_path: str) -> np.ndarray:
-        """Extract features from image using AI model"""
-        # TODO: Implement AI feature extraction
-        # This is a placeholder that will be replaced with actual AI model
+    def extract_features_and_store(self, image_paths: List[str]) -> Tuple[faiss.Index, np.ndarray]:
+        """Extract features from images using CLIP model and store in FAISS index"""
+
         try:
-            # For now, return a simple feature vector (placeholder)
-            # In the future, this will use a pre-trained model like ResNet, VGG, etc.
-            image = cv2.imread(image_path)
-            if image is None:
-                return np.zeros(512)  # Placeholder feature vector
+            embeddings = []
+            for image_path in image_paths:
+                image = Image.open(image_path).convert('RGB')
+                inputs = self.processor(images=image, return_tensors="pt").to(self.device)
+                with torch.no_grad():
+                    embedding = self.model.get_image_features(**inputs)
+                    embedding = embedding / embedding.norm(p=2, dim=-1, keepdim=True)  
+                    embeddings.append(embedding.cpu().numpy().flatten())
             
-            # Placeholder: simple histogram-based features
-            # This will be replaced with proper AI model features
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
-            hist = hist.flatten() / hist.sum()  # Normalize
+            embeddings_stored = np.vstack(embeddings)
+            index = faiss.IndexFlatIP(embeddings_stored.shape[1])  
+            index.add(embeddings_stored.astype('float32'))
+            return index, embeddings_stored
+
+        except Exception as e:
+            print(f"Error extracting features from {image_paths}: {e}")
+            return None, None
+    
+    def merge_similar_groups_ai(self, groups: List[List[int]], image_paths: List[str], similarity_threshold: float = 0.9) -> List[List[int]]:
+        """Merge similar groups using AI by comparing best images from each group"""
+        
+        try:
+            print("Merging similar groups using AI analysis...")
             
-            # Pad or truncate to 512 dimensions (placeholder)
-            if len(hist) < 512:
-                hist = np.pad(hist, (0, 512 - len(hist)), 'constant')
-            else:
-                hist = hist[:512]
+            if len(groups) < 2:
+                return groups
             
-            return hist
+            # Find best image from each group based on quality
+            best_images = []
+            for group in groups:
+                best_image_idx = None
+                best_score = -1
+                
+                for img_idx in group:
+                    image_path = image_paths[img_idx]
+                    quality = self.assess_image_quality(image_path)
+                    if quality['overall_score'] > best_score:
+                        best_score = quality['overall_score']
+                        best_image_idx = img_idx
+                
+                best_images.append({
+                    'group_idx': len(best_images),
+                    'image_idx': best_image_idx,
+                    'image_path': image_paths[best_image_idx],
+                    'quality_score': best_score
+                })
+            
+            print(f"Found {len(best_images)} best images to compare")
+            
+            # Extract features for best images only
+            best_image_paths = [img['image_path'] for img in best_images]
+            index, embeddings = self.extract_features_and_store(best_image_paths)
+            
+            if index is None or embeddings is None:
+                print("Failed to extract features for best images")
+                return groups
+            
+            # Compare best images and merge groups if similar
+            merged_groups = groups.copy()
+            processed_groups = set()
+            
+            for i in range(len(best_images)):
+                if i in processed_groups:
+                    continue
+                
+                current_group_idx = best_images[i]['group_idx']
+                if current_group_idx in processed_groups:
+                    continue
+                
+                # Find similar groups
+                for j in range(i + 1, len(best_images)):
+                    if j in processed_groups:
+                        continue
+                    
+                    target_group_idx = best_images[j]['group_idx']
+                    if target_group_idx in processed_groups:
+                        continue
+                    
+                    # Calculate similarity between best images
+                    similarity = self.calculate_similarity_between_embeddings(
+                        embeddings[i], embeddings[j]
+                    )
+                    
+                    print(f"Comparing groups {current_group_idx} and {target_group_idx}: {similarity:.2%} similar")
+                    
+                    if similarity >= similarity_threshold:
+                        # Merge groups
+                        print(f"Merging groups {current_group_idx} and {target_group_idx} (similarity: {similarity:.2%})")
+                        
+                        # Add all images from target group to current group
+                        merged_groups[current_group_idx].extend(merged_groups[target_group_idx])
+                        
+                        # Mark target group as processed
+                        processed_groups.add(target_group_idx)
+                        
+                        # Remove the merged group (will be handled later)
+                        merged_groups[target_group_idx] = []
+            
+            # Remove empty groups (merged ones)
+            final_groups = [group for group in merged_groups if group]
+            
+            print(f"AI merging reduced {len(groups)} groups to {len(final_groups)} groups")
+            return final_groups
             
         except Exception as e:
-            print(f"Error extracting features from {image_path}: {e}")
-            return np.zeros(512)
+            print(f"Error merging similar groups with AI: {e}")
+            return groups
     
-    def calculate_ai_similarity(self, features1: np.ndarray, features2: np.ndarray) -> float:
-        """Calculate similarity between two feature vectors using AI-based metrics"""
-        # TODO: Implement AI-based similarity calculation
-        # This is a placeholder that will be replaced with actual AI similarity metrics
+    def calculate_similarity_between_embeddings(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
+        """Calculate cosine similarity between two embeddings"""
         try:
-            # Placeholder: cosine similarity
-            # In the future, this will use more sophisticated AI similarity metrics
-            dot_product = np.dot(features1, features2)
-            norm1 = np.linalg.norm(features1)
-            norm2 = np.linalg.norm(features2)
+            # Ensure embeddings are 1D
+            emb1 = embedding1.flatten()
+            emb2 = embedding2.flatten()
+            
+            # Calculate cosine similarity
+            dot_product = np.dot(emb1, emb2)
+            norm1 = np.linalg.norm(emb1)
+            norm2 = np.linalg.norm(emb2)
             
             if norm1 == 0 or norm2 == 0:
                 return 0.0
@@ -125,70 +214,66 @@ class AIAnalyzer:
             return max(0.0, similarity)
             
         except Exception as e:
-            print(f"Error calculating AI similarity: {e}")
+            print(f"Error calculating similarity: {e}")
             return 0.0
     
-    def group_similar_images(self, image_paths: List[str], similarity_threshold: float = 0.7) -> List[List[int]]:
-        """Group similar images using AI-based analysis"""
-        # TODO: Implement AI-based grouping
-        # This is a placeholder that will be replaced with actual AI clustering
-        try:
-            print("Grouping similar images using AI-based analysis...")
+    # def group_similar_images(self, image_paths: List[str], similarity_threshold: float = 0.7) -> List[List[int]]:
+    #     """Group similar images using AI-based analysis (legacy method - kept for compatibility)"""
+
+    #     try:
+    #         print("Grouping similar images using AI-based analysis...")
             
-            if len(image_paths) < 2:
-                return []
+    #         if len(image_paths) < 2:
+    #             return []
             
-            # Extract features for all images
-            features = []
-            for image_path in image_paths:
-                feature_vector = self.extract_features(image_path)
-                features.append(feature_vector)
+    #         # Extract features for all images and store them in faiss
+    #         index, embeddings = self.extract_features_and_store(image_paths)
+
+    #         if index is None or embeddings is None:
+    #             return []
             
-            # TODO: Implement proper AI clustering (DBSCAN, K-means, etc.)
-            # For now, use a simple approach similar to pixel comparison
-            groups = []
-            processed = set()
+    #         # Get nearest neighbors for each image
+    #         k = min(10, len(image_paths))  # Don't search for more neighbors than images
+    #         similarity_scores, neighbor_indices = index.search(embeddings.astype('float32'), k)
+
+    #         # Group images based on similarity scores
+    #         groups = []
+    #         processed = set()
             
-            for i in range(len(image_paths)):
-                if i in processed:
-                    continue
+    #         for i in range(len(image_paths)):
+    #             if i in processed:
+    #                 continue
                 
-                current_group = [i]
-                processed.add(i)
-                
-                for j in range(i + 1, len(image_paths)):
-                    if j in processed:
-                        continue
+    #             current_group = [i]
+    #             processed.add(i)
+
+    #                 # Check neighbors of current image
+    #                 for neighbor_idx in range(1, k):  # Skip first neighbor (self)
+    #                     j = neighbor_indices[i][neighbor_idx]
+    #                     if j == -1 or j in processed:  # -1 means no neighbor found
+    #                         continue
                     
-                    try:
-                        similarity = self.calculate_ai_similarity(features[i], features[j])
-                        
-                        if similarity >= similarity_threshold:
-                            current_group.append(j)
-                            processed.add(j)
-                            print(f"Images {i} and {j} are {similarity:.2%} similar - grouped together")
-                        else:
-                            print(f"Images {i} and {j} are {similarity:.2%} similar - kept separate")
-                            
-                    except Exception as e:
-                        print(f"Error comparing images {i} and {j}: {e}")
-                        continue
+    #                     similarity = similarity_scores[i][neighbor_idx]
+    #                     if similarity >= similarity_threshold:
+    #                         current_group.append(j)
+    #                         processed.add(j)
+    #                         print(f"Images {i} and {j} are {similarity:.2%} similar - grouped together")
+    #                     else:
+    #                         print(f"Images {i} and {j} are {similarity:.2%} similar - kept separate")
                 
-                groups.append(current_group)
+    #             groups.append(current_group)
             
-            print(f"AI analysis created {len(groups)} groups")
-            return groups
+    #         print(f"AI analysis created {len(groups)} groups")
+    #         return groups
             
-        except Exception as e:
-            print(f"Error grouping similar images: {e}")
-            return []
+    #     except Exception as e:
+    #         print(f"Error grouping similar images: {e}")
+    #         return []
     
     def analyze_similar_images(self, image_paths: List[str]) -> Dict:
-        """Complete similar image analysis pipeline using AI"""
-        # TODO: Implement complete AI analysis pipeline
-        # This is a placeholder that will be replaced with actual AI analysis
+        """Complete similar image analysis pipeline using hybrid approach (duplicates + AI)"""
         try:
-            print(f"Starting AI-based similar image analysis of {len(image_paths)} images...")
+            print(f"Starting hybrid similar image analysis of {len(image_paths)} images...")
             
             if not image_paths:
                 return {
@@ -197,8 +282,16 @@ class AIAnalyzer:
                     'statistics': {}
                 }
             
-            # Group similar images using AI
-            groups = self.group_similar_images(image_paths)
+            # Step 1: Find exact duplicates using pixel analyzer
+            print("Step 1: Finding exact duplicates...")
+            pixel_analyzer = PixelAnalyzer()
+            duplicate_groups = pixel_analyzer.group_exact_duplicates(image_paths)
+            print(f"Found {len(duplicate_groups)} duplicate groups")
+            
+            # Step 2: Merge similar groups using AI
+            print("Step 2: Merging similar groups with AI...")
+            groups = self.merge_similar_groups_ai(duplicate_groups, image_paths)
+            print(f"Final result: {len(groups)} groups after AI merging")
             
             # Analyze each group
             analyzed_groups = []
