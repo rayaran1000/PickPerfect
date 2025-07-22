@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LucideImage, Settings, LogOut, RefreshCw, Check, Home, Upload, ChevronLeft, ChevronRight, RotateCcw, Brain, Zap, Star } from "lucide-react"
-import { ThemeToggle } from "@/components/Theme-handling/theme-toggle"
+import { Settings, LogOut, RefreshCw, Check, Home, Upload, ChevronLeft, ChevronRight, RotateCcw, Brain, Zap, Star } from "lucide-react"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { PhotoUpload } from "@/components/Photo-handling/PhotoUpload"
 import { UploadedPhoto } from "@/components/Photo-handling/PhotoHandler"
 import { AnalysisType } from "@/components/Photo-handling/AnalysisTypeSelector"
@@ -279,35 +280,7 @@ export default function UserDashboard() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <LucideImage className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">PickPerfect</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => router.push("/")}
-              className="gap-2"
-            >
-              <Home className="h-4 w-4" />
-              Home
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <span className="hidden md:inline text-sm">{user.email}</span>
-            </div>
-            <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
       
       <main className="flex-1 container py-8">
         <div className="mb-6">
@@ -604,19 +577,7 @@ export default function UserDashboard() {
         </Tabs>
       </main>
       
-      <footer className="border-t py-6">
-        <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-sm text-muted-foreground">© 2025 PickPerfect. All rights reserved.</p>
-          <div className="flex gap-4">
-            <a href="#" className="text-sm text-muted-foreground hover:underline">
-              Privacy Policy
-            </a>
-            <a href="#" className="text-sm text-muted-foreground hover:underline">
-              Terms of Service
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

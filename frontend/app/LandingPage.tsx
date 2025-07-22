@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { FcGoogle } from "react-icons/fc"
 import { LucideImage, Sparkles, Shield, Zap, Users, Star, ArrowRight, CheckCircle, LogOut } from "lucide-react"
-import { ThemeToggle } from "@/components/Theme-handling/theme-toggle"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
 
@@ -11,21 +12,7 @@ export default function LandingPage() {
     
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <LucideImage className="h-6 w-6 text-primary" />
-              <Sparkles className="h-3 w-3 text-yellow-500 absolute -top-1 -right-1" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              PickPerfect
-            </span>
-          </div>
-          <ThemeToggle />
-        </div>
-      </header>
+      <Header />
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -264,61 +251,7 @@ export default function LandingPage() {
           )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t py-12">
-        <div className="container">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <LucideImage className="h-6 w-6 text-primary" />
-                <span className="text-xl font-bold">PickPerfect</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                AI-powered photo organization that actually works.
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              <h4 className="font-semibold">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">API</a></li>
-              </ul>
-            </div>
-            
-            <div className="space-y-4">
-              <h4 className="font-semibold">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
-              </ul>
-            </div>
-            
-            <div className="space-y-4">
-              <h4 className="font-semibold">Support</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Status</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">© 2025 PickPerfect. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Terms of Service
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
