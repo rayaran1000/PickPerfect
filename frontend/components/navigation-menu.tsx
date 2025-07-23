@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ChevronDown, Home, Star, Users, FileText, Settings, LogOut, Menu, MessageSquare } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import Link from "next/link"
@@ -38,6 +39,18 @@ export function NavigationMenu() {
 
   const pages = user ? authenticatedPages : publicPages
 
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return "U"
+    
+    const name = user.user_metadata?.full_name || 
+                user.user_metadata?.name || 
+                user.email?.split('@')[0] || 
+                "U"
+    
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+  }
+
   return (
     <div className="relative">
       <Button
@@ -46,7 +59,17 @@ export function NavigationMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="gap-2"
       >
-        <Menu className="h-4 w-4" />
+        {user ? (
+          // Show user initials when logged in
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-xs font-medium">
+              {getUserInitials()}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          // Show menu icon when user is not logged in
+          <Menu className="h-4 w-4" />
+        )}
         <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </Button>
 
@@ -61,6 +84,28 @@ export function NavigationMenu() {
           {/* Dropdown Menu */}
           <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-background shadow-lg z-50">
             <div className="p-2 space-y-1">
+              {/* User info section when logged in */}
+              {user && (
+                <div className="px-3 py-2 border-b">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs font-medium">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {user.user_metadata?.full_name || user.user_metadata?.name || "User"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation pages */}
               {pages.map((page) => {
                 const Icon = page.icon
                 return (

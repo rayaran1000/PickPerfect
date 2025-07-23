@@ -129,6 +129,12 @@ export function PhotoUpload({ onPhotosChange, onAnalysisComplete, onAnalysisType
       return
     }
 
+    // Check if user has uploaded more than 1 photo
+    if (uploadedPhotos.length <= 1) {
+      setError("Please upload more than 1 photo for analysis. Duplicate detection requires at least 2 photos to compare.")
+      return
+    }
+
     setIsAnalyzing(true)
     setError(null)
     setAnalysisProgress(0)
@@ -223,6 +229,14 @@ export function PhotoUpload({ onPhotosChange, onAnalysisComplete, onAnalysisType
             </div>
           )}
 
+          {/* Warning Display - Only 1 photo uploaded */}
+          {uploadSuccess && uploadedPhotos.length === 1 && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-sm">Please upload more than 1 photo to start analysis. Duplicate detection requires at least 2 photos to compare.</span>
+            </div>
+          )}
+
           {/* Upload Area - Only show when no photos uploaded */}
           {!uploadSuccess && (
             <>
@@ -256,20 +270,30 @@ export function PhotoUpload({ onPhotosChange, onAnalysisComplete, onAnalysisType
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h4 className="font-medium">Uploaded Photos ({uploadedPhotos.length})</h4>
-                <Button 
-                  onClick={startAnalysis}
-                  disabled={isAnalyzing}
-                  size="sm"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    'Start Analysis'
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={handleStartOver}
+                    size="sm"
+                  >
+                    Re-upload
+                  </Button>
+                  <Button 
+                    onClick={startAnalysis}
+                    disabled={isAnalyzing || uploadedPhotos.length <= 1}
+                    size="sm"
+                    title={uploadedPhotos.length <= 1 ? "Upload more than 1 photo to start analysis" : ""}
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      'Start Analysis'
+                    )}
+                  </Button>
+                </div>
               </div>
               
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
