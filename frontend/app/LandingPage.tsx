@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button"
 import { FcGoogle } from "react-icons/fc"
-import { LucideImage, Sparkles, Shield, Zap, Users, Star, ArrowRight, CheckCircle, LogOut } from "lucide-react"
+import { LucideImage, Sparkles, Shield, Zap, Users, Star, ArrowRight, CheckCircle, LogOut, List } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
+import { BackgroundImage } from "@/components/BackgroundImage"
+import { FAQAccordion } from "@/components/FAQAccordion"
 
 export default function LandingPage() {
     const { signInWithGoogle, signOut, user, loading } = useAuth()
@@ -16,16 +18,14 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5" />
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <section className="relative overflow-hidden min-h-screen flex items-center">
+          {/* Background Image with Theme Support */}
+          <BackgroundImage />
           
-          <div className="container relative py-20 md:py-32 lg:py-40">
+          <div className="container relative py-20 md:py-32 lg:py-40 w-full">
             <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-12 text-center">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm border border-white/50 text-sm font-medium text-gray-900 shadow-lg">
                 <Sparkles className="h-4 w-4" />
                 AI-Powered Photo Organization
               </div>
@@ -33,13 +33,13 @@ export default function LandingPage() {
               {/* Main heading */}
               <div className="space-y-6">
                 <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-                  <span className="bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-gray-800 via-purple-700 to-pink-700 bg-clip-text text-transparent drop-shadow-lg">
                     Clean up your
                   </span>
                   <br />
-                  <span className="text-foreground">Photo Library</span>
+                  <span className="text-gray-900 drop-shadow-lg">Photo Library</span>
                 </h1>
-                <p className="max-w-[800px] text-xl text-muted-foreground md:text-2xl leading-relaxed">
+                <p className="max-w-[800px] text-xl text-gray-800 md:text-2xl leading-relaxed drop-shadow-md dark:text-white">
                   Transform your cluttered photo collection into a perfectly organized gallery. 
                   Our AI detects duplicates and similar photos with incredible accuracy.
                 </p>
@@ -47,17 +47,17 @@ export default function LandingPage() {
 
               {/* Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-2xl">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">99.9%</div>
-                  <div className="text-sm text-muted-foreground">Accuracy Rate</div>
+                <div className="text-center p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg dark:bg-black/20 dark:border-white/20">
+                  <div className="text-3xl font-bold text-gray-900 drop-shadow-lg dark:text-white">99.9%</div>
+                  <div className="text-sm text-gray-800 drop-shadow-md dark:text-white/90">Accuracy Rate</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">10x</div>
-                  <div className="text-sm text-muted-foreground">Faster Processing</div>
+                <div className="text-center p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg dark:bg-black/20 dark:border-white/20">
+                  <div className="text-3xl font-bold text-gray-900 drop-shadow-lg dark:text-white">10x</div>
+                  <div className="text-sm text-gray-800 drop-shadow-md dark:text-white/90">Faster Processing</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">50GB+</div>
-                  <div className="text-sm text-muted-foreground">Space Saved</div>
+                <div className="text-center p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg dark:bg-black/20 dark:border-white/20">
+                  <div className="text-3xl font-bold text-gray-900 drop-shadow-lg dark:text-white">50GB+</div>
+                  <div className="text-sm text-gray-800 drop-shadow-md dark:text-white/90">Space Saved</div>
                 </div>
               </div>
 
@@ -65,12 +65,12 @@ export default function LandingPage() {
               {user ? (
                 <div className="text-center space-y-4">
                 <div className="flex items-center gap-2 justify-center">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <p className="text-lg font-medium">Welcome back, {user.email}!</p>
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <p className="text-lg font-medium text-gray-900">Welcome back, {user.email}!</p>
                 </div>
-                <p className="text-muted-foreground">Ready to organize your photos?</p>
+                <p className="text-gray-700">Ready to organize your photos?</p>
                 <div className="flex flex-col items-center gap-4">
-                  <Button size="lg" onClick={() => router.push('/dashboard')} className="gap-2 w-full max-w-xs">
+                  <Button size="lg" onClick={() => router.push('/dashboard')} className="gap-2 w-full max-w-xs shadow-lg">
                     <ArrowRight className="h-4 w-4" />
                     Go to Dashboard
                   </Button>
@@ -82,12 +82,12 @@ export default function LandingPage() {
               </div>
               ) : (
                 <div className="space-y-4">
-                  <Button size="lg" onClick={signInWithGoogle} disabled={loading} className="gap-2 px-8 py-6 text-lg">
+                  <Button size="lg" onClick={signInWithGoogle} disabled={loading} className="gap-2 px-8 py-6 text-lg shadow-lg">
                     <FcGoogle className="h-5 w-5" />
                     Get Started with Google
                     <ArrowRight className="h-4 w-4" />
                   </Button>
-                  <p className="text-sm text-muted-foreground">Free to use • No credit card required</p>
+                  <p className="text-sm text-gray-700">Free to use • No credit card required</p>
                 </div>
               )}
             </div>
@@ -151,7 +151,7 @@ export default function LandingPage() {
         </section>
 
         {/* How it Works Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="container py-20 md:py-32">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">How It Works</h2>
@@ -193,7 +193,7 @@ export default function LandingPage() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="container py-20 md:py-32">
           <div className="mx-auto max-w-4xl text-center">
             <h2 className="text-4xl font-bold mb-4">Loved by Photographers</h2>
             <p className="text-xl text-muted-foreground mb-12">
@@ -228,9 +228,58 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <section className="container py-20 md:py-32">
+          <div className="mx-auto max-w-5xl">
+            <div className="flex items-center gap-3 mb-12">
+              <List className="h-6 w-6 text-primary" />
+              <h2 className="text-3xl font-bold">Related</h2>
+            </div>
+
+            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-8 dark:bg-black/20 dark:border-white/20">
+              <FAQAccordion 
+                faqs={[
+                  {
+                    question: "How does PickPerfect work?",
+                    answer: "PickPerfect uses advanced AI technology to analyze your photos. It can detect both exact duplicates and similar images using two different modes: pixel-perfect comparison and AI-powered semantic analysis with CLIP models."
+                  },
+                  {
+                    question: "What file formats are supported?",
+                    answer: "We support all major image formats including JPG, PNG, GIF, WebP, BMP, and TIFF. Each file can be up to 50MB, and you can upload up to 50 photos per session."
+                  },
+                  {
+                    question: "Is my data secure?",
+                    answer: "Yes! Your photos are processed locally and never permanently stored on our servers. All files are automatically cleaned up after your session ends, ensuring complete privacy and security."
+                  },
+                  {
+                    question: "What's the difference between exact duplicates and similar images?",
+                    answer: "Exact duplicates are identical or nearly identical photos (99%+ similarity). Similar images are photos with similar content, composition, or subject matter detected by our AI, even if they're not pixel-perfect matches."
+                  },
+                  {
+                    question: "How accurate is the AI analysis?",
+                    answer: "Our AI achieves 99.9% accuracy in detecting duplicates and similar images. The system uses multiple quality metrics to identify the best photo in each group, ensuring you keep the highest quality version."
+                  },
+                  {
+                    question: "Can I download the photos I want to keep?",
+                    answer: "Absolutely! You can download selected photos individually or choose to download only the best quality photo from each group. All downloads are provided as ZIP files for easy organization."
+                  },
+                  {
+                    question: "How long does the analysis take?",
+                    answer: "Analysis typically takes 2-5 minutes depending on the number and size of your photos. Our AI processes images in batches and provides real-time progress updates so you always know what's happening."
+                  },
+                  {
+                    question: "Is PickPerfect free to use?",
+                    answer: "Yes! PickPerfect is completely free to use with no credit card required. We believe everyone should have access to powerful photo organization tools without any cost barriers."
+                  }
+                ]} 
+              />
+            </div>
+          </div>
+        </section>
+
         {/* Final CTA Section */}
         {!user && (
-        <section className="container py-20 md:py-32 border-t">
+        <section className="container py-20 md:py-32">
           <div className="mx-auto max-w-4xl text-center">
                 <div className="text-center space-y-4">
                 <h2 className="text-4xl font-bold mb-4">Ready to Transform Your Photo Library?</h2>
