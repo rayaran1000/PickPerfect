@@ -44,7 +44,7 @@ interface PhotoGroup {
 }
 
 export default function UserDashboard() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, loading } = useAuth()
   const router = useRouter()
   
   const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([])
@@ -64,10 +64,10 @@ export default function UserDashboard() {
 
   // Redirect to home if not authenticated
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       router.push("/")
     }
-  }, [user, router])
+  }, [user, loading, router])
 
   // Auto-advance tabs based on state
   useEffect(() => {
