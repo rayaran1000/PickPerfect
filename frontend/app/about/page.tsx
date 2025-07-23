@@ -7,10 +7,22 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 export default function AboutPage() {
     const { signOut, user } = useAuth()
     const router = useRouter()
+    const [emailCopied, setEmailCopied] = useState(false)
+    
+    const copyEmailToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText('aranya.ray1998@gmail.com')
+            setEmailCopied(true)
+            setTimeout(() => setEmailCopied(false), 2000)
+        } catch (err) {
+            console.error('Failed to copy email:', err)
+        }
+    }
     
   return (
     <div className="flex min-h-screen flex-col">
@@ -326,9 +338,15 @@ export default function AboutPage() {
                   <MessageSquare className="h-4 w-4" />
                   Send Feedback
                 </Button>
-                <Button size="lg" variant="outline" className="gap-2" onClick={() => window.open('mailto:aranya.ray1998@gmail.com', '_blank')}>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="gap-2" 
+                  onClick={copyEmailToClipboard}
+                >
                   <MailIcon className="h-4 w-4" />
-                  aranya.ray1998@gmail.com
+                  {emailCopied ? 'Email Copied!' : 'aranya.ray1998@gmail.com'}
+                  {emailCopied && <CheckCircle className="h-4 w-4 text-green-500" />}
                 </Button>
               </div>
             </div>
