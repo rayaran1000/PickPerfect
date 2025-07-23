@@ -67,9 +67,9 @@ export default function LandingPage() {
                 <div className="text-center space-y-4">
                 <div className="flex items-center gap-2 justify-center">
                   <CheckCircle className="h-5 w-5 text-green-600" />
-                  <p className="text-lg font-medium text-gray-900">Welcome back, {user.email}!</p>
+                  <p className="text-lg font-medium text-foreground">Welcome back, {user.user_metadata.full_name}!</p>
                 </div>
-                <p className="text-gray-700">Ready to organize your photos?</p>
+                <p className="text-muted-foreground">Ready to organize your photos?</p>
                 <div className="flex flex-col items-center gap-4">
                   <Button size="lg" onClick={() => router.push('/dashboard')} className="gap-2 w-full max-w-xs shadow-lg">
                     <ArrowRight className="h-4 w-4" />
