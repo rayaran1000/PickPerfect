@@ -18,7 +18,7 @@ interface TestimonialsCarouselProps {
 export function TestimonialsCarousel({ testimonials, className = "" }: TestimonialsCarouselProps) {
   const [isHovered, setIsHovered] = useState(false)
   const carouselRef = useRef<HTMLDivElement>(null)
-  const intervalRef = useRef<NodeJS.Timeout>()
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   // Continuous smooth scrolling animation
   useEffect(() => {
