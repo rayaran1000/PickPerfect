@@ -88,7 +88,7 @@ export default function LandingPage() {
                     Get Started with Google
                     <ArrowRight className="h-4 w-4" />
                   </Button>
-                  <p className="text-sm text-gray-700">Free to use • No credit card required</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">Free to use • No credit card required</p>
                 </div>
               )}
             </div>
