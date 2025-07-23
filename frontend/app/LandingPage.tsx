@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
 import { BackgroundImage } from "@/components/BackgroundImage"
 import { FAQAccordion } from "@/components/FAQAccordion"
+import { TestimonialsCarousel } from "@/components/TestimonialsCarousel"
 
 export default function LandingPage() {
     const { signInWithGoogle, signOut, user, loading } = useAuth()
@@ -194,37 +195,60 @@ export default function LandingPage() {
 
         {/* Testimonials Section */}
         <section className="container py-20 md:py-32">
-          <div className="mx-auto max-w-4xl text-center">
-            <h2 className="text-4xl font-bold mb-4">Loved by Photographers</h2>
-            <p className="text-xl text-muted-foreground mb-12">
-              See what our users are saying about PickPerfect
-            </p>
-            
-            <div className="grid gap-8 md:grid-cols-2">
-              <div className="p-6 rounded-2xl border bg-card">
-                <div className="flex items-center gap-1 mb-4 justify-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-muted-foreground mb-4">
-                  "PickPerfect saved me hours of manual work. The AI is incredibly accurate and the interface is so intuitive!"
-                </p>
-                <div className="font-medium">- Sarah Chen, Professional Photographer</div>
-              </div>
-              
-              <div className="p-6 rounded-2xl border bg-card">
-                <div className="flex items-center gap-1 mb-4 justify-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-muted-foreground mb-4">
-                  "Finally, a tool that actually works! I freed up 30GB of space and my photos are perfectly organized now."
-                </p>
-                <div className="font-medium">- Mike Rodriguez, Travel Blogger</div>
-              </div>
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold mb-4">Loved by Photographers</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                See what our users are saying about PickPerfect
+              </p>
             </div>
+            
+            <TestimonialsCarousel 
+              testimonials={[
+                {
+                  id: 1,
+                  text: "PickPerfect saved me hours of manual work. The AI is incredibly accurate and the interface is so intuitive!",
+                  author: "Sarah Chen",
+                  role: "Professional Photographer"
+                },
+                {
+                  id: 2,
+                  text: "Finally, a tool that actually works! I freed up 30GB of space and my photos are perfectly organized now.",
+                  author: "Mike Rodriguez",
+                  role: "Travel Blogger"
+                },
+                {
+                  id: 3,
+                  text: "The AI analysis is mind-blowing. It found duplicates I didn't even know existed and the quality assessment is spot-on.",
+                  author: "Emma Thompson",
+                  role: "Wedding Photographer"
+                },
+                {
+                  id: 4,
+                  text: "As a content creator, I have thousands of photos. PickPerfect helped me organize everything in minutes, not hours.",
+                  author: "Alex Johnson",
+                  role: "Content Creator"
+                },
+                {
+                  id: 5,
+                  text: "The best photo organization tool I've ever used. The similar image detection is incredibly smart and accurate.",
+                  author: "David Kim",
+                  role: "Product Photographer"
+                },
+                {
+                  id: 6,
+                  text: "I was skeptical at first, but PickPerfect exceeded all my expectations. It's like having a professional photo editor.",
+                  author: "Lisa Wang",
+                  role: "Event Photographer"
+                },
+                {
+                  id: 7,
+                  text: "This tool is a game-changer for anyone with a large photo library. The space savings alone make it worth it!",
+                  author: "James Wilson",
+                  role: "Real Estate Photographer"
+                }
+              ]}
+            />
           </div>
         </section>
 
@@ -233,7 +257,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-5xl">
             <div className="flex items-center gap-3 mb-12">
               <List className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold">Related</h2>
+              <h2 className="text-3xl font-bold">FAQs</h2>
             </div>
 
             <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-8 dark:bg-black/20 dark:border-white/20">
