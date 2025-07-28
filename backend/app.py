@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, redirect
 from flask_cors import CORS
 import os
 import uuid
@@ -18,6 +18,7 @@ import tempfile
 from services.pixel_analyzer import PixelAnalyzer
 from services.ai_analyzer import AIAnalyzer
 from services.file_handler import FileHandler
+from services.supabase_storage import SupabaseStorageService
 
 # Load environment variables
 load_dotenv()
@@ -35,6 +36,7 @@ CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 pixel_analyzer = PixelAnalyzer()
 ai_analyzer = AIAnalyzer()
 file_handler = FileHandler()
+supabase_storage = SupabaseStorageService()
 
 # Store analysis results in memory (in production, use a database)
 analysis_results = {}
@@ -113,37 +115,83 @@ def analyze_images():
         if not user_id:
             return jsonify({'error': 'User ID is required'}), 400
         
-        # Get session directory
-        session_dir = os.path.join(file_handler.upload_folder, session_id)
-        if not os.path.exists(session_dir):
-            return jsonify({'error': 'Session not found'}), 404
+        # Get session files from Supabase Storage
+        session_files = supabase_storage.get_session_files(user_id, session_id)
+        if not session_files:
+            return jsonify({'error': 'No files found for this session'}), 404
         
-        # Get all image files in the session
-        image_files = []
-        for filename in os.listdir(session_dir):
-            if file_handler.is_valid_image(filename):
-                file_path = os.path.join(session_dir, filename)
-                image_files.append(file_path)
-        
-        if not image_files:
+        # Filter valid image files
+        valid_files = [f for f in session_files if supabase_storage.is_valid_image_file(f)]
+        if not valid_files:
             return jsonify({'error': 'No valid images found in session'}), 400
         
         # Get analysis type from request (default to pixel-based for backward compatibility)
         analysis_type = data.get('analysis_type', 'pixel')
         
-        print(f"Starting {analysis_type.upper()} analysis for session {session_id}")
+
         
         # Start analysis in a separate thread to avoid blocking
         def run_analysis():
             try:
+                # Download files to temporary locations for analysis
+                temp_file_paths = supabase_storage.download_session_files(user_id, session_id)
+                
+                if not temp_file_paths:
+                    analysis_results[session_id] = {'error': 'Failed to download files for analysis'}
+                    return
+                
+                # Create mappings for file serving
+                temp_to_supabase_mapping = {}
+                temp_to_original_mapping = {}
+                
+                # Create a mapping by index since temp files and valid files should be in the same order
+                for i, temp_path in enumerate(temp_file_paths):
+                    if i < len(valid_files):
+                        supabase_path = valid_files[i]['name']  # Full path like "user_id/session_id_filename.png"
+                        temp_to_supabase_mapping[temp_path] = supabase_path
+                        
+                        # Extract original filename from Supabase path
+                        supabase_filename = os.path.basename(supabase_path)  # "session_id_filename.png"
+                        if supabase_filename.startswith(f"{session_id}_"):
+                            original_filename = supabase_filename[len(f"{session_id}_"):]  # "filename.png"
+                        else:
+                            original_filename = supabase_filename
+                        
+                        temp_to_original_mapping[original_filename] = temp_path
+                
+                # Run analysis on the downloaded files
                 if analysis_type == 'ai':
-                    print(f"Using AI analyzer for session {session_id}")
-                    result = ai_analyzer.analyze_similar_images(image_files)
+                    result = ai_analyzer.analyze_similar_images(temp_file_paths)
                 else:
-                    print(f"Using pixel analyzer for session {session_id}")
-                    result = pixel_analyzer.analyze_exact_duplicates(image_files)
+                    result = pixel_analyzer.analyze_exact_duplicates(temp_file_paths)
+                
+                # Convert temporary file paths back to Supabase Storage paths for frontend display
+                if result.get('success') and len(result.get('groups')) > 0:
+                    for group in result['groups']:
+                        for image in group.get('images', []):
+                            # Convert temp path back to Supabase Storage path using mapping
+                            temp_path = image['path']
+                            if temp_path in temp_to_supabase_mapping:
+                                old_path = image['path']
+                                image['path'] = temp_to_supabase_mapping[temp_path]
+                            else:
+                                print(f"Warning: No mapping found for temp path {temp_path}")
+                        
+                        # Update best image path
+                        if 'best_image' in group:
+                            temp_path = group['best_image']['path']
+                            if temp_path in temp_to_supabase_mapping:
+                                old_path = group['best_image']['path']
+                                group['best_image']['path'] = temp_to_supabase_mapping[temp_path]
+                            else:
+                                print(f"Warning: No mapping found for best image temp path {temp_path}")
+                
                 analysis_results[session_id] = result
+                
+                supabase_storage.cleanup_temp_files(temp_file_paths)
+                
             except Exception as e:
+                print(f"Error in analysis thread: {e}")
                 analysis_results[session_id] = {'error': str(e)}
         
         # Start analysis thread
@@ -154,7 +202,7 @@ def analyze_images():
             'success': True,
             'session_id': session_id,
             'message': 'Analysis started',
-            'total_images': len(image_files),
+            'total_images': len(valid_files),
             'status': 'processing'
         })
         
@@ -166,18 +214,13 @@ def get_analysis_status(session_id):
     """Get the status of image analysis"""
     try:
         if session_id not in analysis_results:
-            # Check if session directory exists (analysis might be starting)
-            session_dir = os.path.join(file_handler.upload_folder, session_id)
-            if os.path.exists(session_dir):
-                return jsonify({
-                    'status': 'processing',
-                    'message': 'Analysis starting up...'
-                })
-            else:
-                return jsonify({
-                    'status': 'not_found',
-                    'message': 'Analysis not found for this session'
-                }), 404
+            # Check if session exists in Supabase Storage (analysis might be starting)
+            # We need user_id to check, but we don't have it in the URL
+            # For now, we'll assume the session exists if it's not in results yet
+            return jsonify({
+                'status': 'processing',
+                'message': 'Analysis starting up...'
+            })
         
         result = analysis_results[session_id]
         
@@ -224,13 +267,37 @@ def get_analysis_results(session_id):
 
 @app.route('/api/image/<session_id>/<filename>', methods=['GET'])
 def serve_image(session_id, filename):
-    """Serve uploaded images"""
+    """Serve uploaded images from temporary files or Supabase Storage"""
     try:
-        file_path = os.path.join(file_handler.upload_folder, session_id, filename)
-        if not os.path.exists(file_path):
+        # Get user_id from query parameter (fallback method)
+        user_id = request.args.get('user_id')
+        
+        if not user_id:
+            # Try to extract user_id from filename if it contains the full path
+            # This handles cases where the frontend passes the full path as filename
+            if '/' in filename:
+                parts = filename.split('/')
+                if len(parts) >= 2:
+                    user_id = parts[0]
+                    # Extract the actual filename (remove session prefix)
+                    actual_filename = parts[1]
+                    if actual_filename.startswith(f"{session_id}_"):
+                        filename = actual_filename[len(f"{session_id}_"):]
+        
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+        
+        # Serve images directly from Supabase Storage
+        # Construct the Supabase Storage path
+        file_path = f"{user_id}/{session_id}_{filename}"
+        
+        # Get the public URL from Supabase Storage
+        public_url = supabase_storage.get_file_url(file_path)
+        if not public_url:
             return jsonify({'error': 'Image not found'}), 404
         
-        return send_file(file_path)
+        # Redirect to the Supabase Storage URL
+        return redirect(public_url)
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -239,8 +306,13 @@ def serve_image(session_id, filename):
 def cleanup_session(session_id):
     """Clean up session files and results"""
     try:
-        # Clean up files
-        success = file_handler.cleanup_session(session_id)
+        # Get user_id from query parameter
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+        
+        # Clean up files from Supabase Storage
+        success = supabase_storage.delete_session_files(user_id, session_id)
         
         # Clean up analysis results
         if session_id in analysis_results:

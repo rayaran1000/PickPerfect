@@ -78,26 +78,76 @@ export default function UserDashboard() {
   }, [analysisResult, photoGroups.length])
 
   const handleAnalysisComplete = (result: AnalysisResult) => {
+    console.log('Analysis result received:', result)
     setAnalysisResult(result)
     
     // Set the session ID from the analysis result
     setSessionId(result.session_id)
     
     // Convert backend result to frontend format and sort by importance
-    const groups: PhotoGroup[] = result.result.groups.map(group => ({
-      id: group.id,
-      type: group.type,
-      images: group.images.map(img => ({
-        ...img,
-        filename: img.path.split(/[/\\]/).pop() || 'unknown' // Handle both / and \ separators
-      })),
-      best_image: {
-        ...group.best_image,
-        filename: group.best_image.path.split(/[/\\]/).pop() || 'unknown' // Handle both / and \ separators
-      },
-      count: group.count,
-      similarity_score: group.similarity_score
-    }))
+    const groups: PhotoGroup[] = result.result.groups.map(group => {
+      console.log('Processing group:', group)
+      return {
+        id: group.id,
+        type: group.type,
+        images: group.images.map(img => {
+          console.log('Processing image:', img)
+          // Extract filename from path (could be temp path or Supabase path)
+          const pathParts = img.path.split('/')
+          const fullFilename = pathParts[pathParts.length - 1] || 'unknown'
+          
+          // Try to extract original filename by removing session prefix
+          const sessionPrefix = `${result.session_id}_`
+          let originalFilename = fullFilename
+          if (fullFilename.startsWith(sessionPrefix)) {
+            originalFilename = fullFilename.substring(sessionPrefix.length)
+          } else {
+            // If no session prefix, try to extract from temp filename
+            // Temp files might have UUID prefixes, so look for common image extensions
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff']
+            for (const ext of imageExtensions) {
+              if (fullFilename.includes(ext)) {
+                const extIndex = fullFilename.indexOf(ext)
+                originalFilename = fullFilename.substring(extIndex - 8, extIndex + ext.length) // Approximate original name
+                break
+              }
+            }
+          }
+          
+          return {
+            ...img,
+            filename: originalFilename
+          }
+        }),
+        best_image: {
+          ...group.best_image,
+          filename: (() => {
+            const pathParts = group.best_image.path.split('/')
+            const fullFilename = pathParts[pathParts.length - 1] || 'unknown'
+            
+            // Try to extract original filename by removing session prefix
+            const sessionPrefix = `${result.session_id}_`
+            let originalFilename = fullFilename
+            if (fullFilename.startsWith(sessionPrefix)) {
+              originalFilename = fullFilename.substring(sessionPrefix.length)
+            } else {
+              // If no session prefix, try to extract from temp filename
+              const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff']
+              for (const ext of imageExtensions) {
+                if (fullFilename.includes(ext)) {
+                  const extIndex = fullFilename.indexOf(ext)
+                  originalFilename = fullFilename.substring(extIndex - 8, extIndex + ext.length)
+                  break
+                }
+              }
+            }
+            return originalFilename
+          })()
+        },
+        count: group.count,
+        similarity_score: group.similarity_score
+      }
+    })
     
     // Sort groups in descending order of importance:
     // 1. Duplicates/similar groups first (more important to review)
@@ -142,13 +192,25 @@ export default function UserDashboard() {
     router.push("/")
   }
 
-  const handleStartOver = () => {
+  const handleStartOver = async () => {
     if (confirm("Are you sure you want to start over? This will discard all current photos and analysis.")) {
+      // Clean up current session if available
+      if (sessionId && user?.id) {
+        try {
+          await apiService.cleanupSession(sessionId)
+          console.log('Session cleaned up before starting over')
+        } catch (error) {
+          console.error('Error cleaning up session:', error)
+          // Continue with start over even if cleanup fails
+        }
+      }
+      
       setUploadedPhotos([])
       setSelectedPhotos(new Set())
       setCurrentGroupIndex(0)
       setAnalysisResult(null)
       setPhotoGroups([])
+      setSessionId(null)
       setAnalysisType('pixel') // Reset to default analysis type
       setActiveTab("upload")
     }
@@ -504,7 +566,7 @@ export default function UserDashboard() {
                             <div key={photo.path} className="relative group">
                               <div className="relative">
                                 <img
-                                  src={apiService.getImageUrl(analysisResult!.session_id, photo.filename)}
+                                  src={apiService.getImageUrl(analysisResult!.session_id, photo.path, user?.id)}
                                   alt={photo.filename}
                                   className="w-full h-auto max-h-64 object-contain rounded-lg"
                                 />

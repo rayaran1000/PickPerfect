@@ -390,10 +390,12 @@ class StorageService {
       throw new Error('Supabase not configured')
     }
 
+    console.log('StorageService.getFileUrl called with filePath:', filePath)
     const { data } = supabase.storage
       .from(this.bucketName)
       .getPublicUrl(filePath)
 
+    console.log('Generated public URL:', data.publicUrl)
     return data.publicUrl
   }
 

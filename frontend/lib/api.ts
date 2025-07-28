@@ -150,11 +150,41 @@ class ApiService {
     return this.request(`/results/${sessionId}`)
   }
 
-      // Get image URL from Supabase Storage
-    getImageUrl(sessionId: string, filename: string): string {
-      // For Supabase Storage, we'll need to construct the path
-      // This will be updated when we have the full file path
-      return enhancedStorageService.getFileUrl(`${sessionId}/${filename}`)
+      // Get image URL directly from Supabase Storage
+    getImageUrl(sessionId: string, filePath: string, userId?: string): string {
+      console.log('getImageUrl called with:', { sessionId, filePath, userId })
+      
+      // If filePath already contains the full Supabase Storage path, use it directly
+      if (filePath.includes('/') && userId) {
+        const url = enhancedStorageService.getFileUrl(filePath)
+        console.log('Using full Supabase path, generated URL:', url)
+        return url
+      }
+      
+      // Otherwise, construct the Supabase Storage path: userId/sessionId_filename
+      if (userId) {
+        // Extract filename from the path
+        let filename = filePath
+        if (filePath.includes('/')) {
+          filename = filePath.split('/').pop() || filePath
+        }
+        
+        // Remove any session prefixes to get the original filename
+        if (filename.startsWith(`${sessionId}_`)) {
+          filename = filename.substring(`${sessionId}_`.length)
+        }
+        
+        const fullPath = `${userId}/${sessionId}_${filename}`
+        const url = enhancedStorageService.getFileUrl(fullPath)
+        console.log('Constructed Supabase path, generated URL:', url)
+        return url
+      }
+      
+      // Fallback to backend URL (should not happen in normal flow)
+      const filename = filePath.includes('/') ? filePath.split('/').pop() || filePath : filePath
+      const url = `${API_BASE_URL}/image/${sessionId}/${filename}`
+      console.log('Using fallback backend URL:', url)
+      return url
     }
 
   // Cleanup session from Supabase Storage
@@ -170,6 +200,7 @@ class ApiService {
     }
     
     try {
+      // Use Supabase Storage service for cleanup
       const success = await enhancedStorageService.deleteSessionFiles(userId, sessionId)
       return {
         success,
@@ -216,10 +247,6 @@ class ApiService {
 
   // Download selected photos from Supabase Storage
   async downloadSelectedPhotos(sessionId: string, photoPaths: string[], userId?: string): Promise<Blob> {
-    if (!userId) {
-      throw new Error('User ID required for download')
-    }
-
     try {
       // Download all selected files
       const downloadPromises = photoPaths.map(async (filePath) => {

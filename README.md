@@ -62,7 +62,11 @@ A web-based application that uses AI to help you organize and clean up your phot
    ```env
    FLASK_ENV=development
    FLASK_DEBUG=1
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_SERVICE_KEY=your_supabase_service_role_key
    ```
+   
+   See `backend/SETUP.md` for detailed setup instructions.
 
 5. **Run the backend server**:
    ```bash
