@@ -184,8 +184,19 @@ export function PhotoUpload({ onPhotosChange, onAnalysisComplete, onAnalysisType
     }
   }
 
-  const handleStartOver = () => {
+  const handleStartOver = async () => {
     if (confirm("Are you sure you want to start over? This will clear all uploaded photos.")) {
+      // Clean up current session if available
+      if (sessionId && user?.id) {
+        try {
+          await apiService.cleanupSession(sessionId, user.id)
+          console.log('Session cleaned up before re-upload')
+        } catch (error) {
+          console.error('Error cleaning up session:', error)
+          // Continue with start over even if cleanup fails
+        }
+      }
+      
       clearAllPhotos()
       setSessionId(null)
       setUploadSuccess(false)

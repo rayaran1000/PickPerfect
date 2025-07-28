@@ -15,6 +15,7 @@ export function NavigationMenu() {
   const router = useRouter()
 
   const handleSignOut = async () => {
+    // The signOut function in auth-provider already handles cleanup
     await signOut()
     router.push("/")
   }

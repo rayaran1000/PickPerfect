@@ -179,7 +179,7 @@ export default function UserDashboard() {
     // Clean up current session photos if available
     if (sessionId && user?.id) {
       try {
-        await apiService.cleanupSession(sessionId)
+        await apiService.cleanupSession(sessionId, user.id)
         console.log('Session cleaned up before logout')
       } catch (error) {
         console.error('Error cleaning up session:', error)
@@ -197,7 +197,7 @@ export default function UserDashboard() {
       // Clean up current session if available
       if (sessionId && user?.id) {
         try {
-          await apiService.cleanupSession(sessionId)
+          await apiService.cleanupSession(sessionId, user.id)
           console.log('Session cleaned up before starting over')
         } catch (error) {
           console.error('Error cleaning up session:', error)
