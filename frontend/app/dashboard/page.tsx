@@ -69,6 +69,27 @@ export default function UserDashboard() {
     }
   }, [user, loading, router])
 
+  // Cleanup any existing session data when dashboard initializes
+  useEffect(() => {
+    const cleanupExistingSession = async () => {
+      if (user?.id) {
+        try {
+          // Clean up any existing session files for this user
+          await apiService.cleanupUserFiles(user.id)
+          console.log('Cleaned up existing session data on dashboard initialization')
+        } catch (error) {
+          console.error('Error cleaning up existing session:', error)
+        }
+      }
+    }
+
+    cleanupExistingSession()
+  }, [user?.id])
+
+
+
+
+
   // Auto-advance tabs based on state
   useEffect(() => {
     if (analysisResult && photoGroups.length > 0) {
