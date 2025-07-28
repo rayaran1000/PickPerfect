@@ -74,13 +74,14 @@ export default function TermsAndPolicyPage() {
                   PickPerfect is an AI-powered photo organization service that helps users:
                 </p>
                 <ul>
-                  <li>Identify and remove duplicate photos</li>
-                  <li>Find similar images using advanced AI algorithms</li>
-                  <li>Organize photo libraries efficiently</li>
-                  <li>Optimize storage space</li>
+                  <li>Identify and remove duplicate photos using pixel-perfect comparison</li>
+                  <li>Find similar images using advanced CLIP AI models</li>
+                  <li>Organize photo libraries efficiently with quality assessment</li>
+                  <li>Optimize storage space with detailed analytics</li>
+                  <li>Download organized photo collections</li>
                 </ul>
                 <p>
-                  Our service processes photos locally and does not permanently store your images on our servers.
+                  Our service processes photos locally and does not permanently store your images on our servers. All files are automatically cleaned up when you leave the dashboard.
                 </p>
               </CardContent>
             </Card>
@@ -124,6 +125,8 @@ export default function TermsAndPolicyPage() {
                   <li>Interfere with or disrupt the service or servers</li>
                   <li>Use automated systems to access the service without permission</li>
                   <li>Upload excessive amounts of data that could impact service performance</li>
+                  <li>Upload more than 50 photos or exceed 100MB total per session</li>
+                  <li>Upload individual files larger than 50MB</li>
                 </ul>
               </CardContent>
             </Card>
@@ -138,10 +141,19 @@ export default function TermsAndPolicyPage() {
                   Your privacy is important to us. Our Privacy Policy explains how we collect, use, and protect your information.
                 </p>
                 <p>
-                  <strong>Photo Processing:</strong> Your photos are processed locally and temporarily stored only for the duration of your analysis session. We do not permanently store your images on our servers.
+                  <strong>Photo Processing:</strong> Your photos are processed locally and temporarily stored only for the duration of your analysis session. We do not permanently store your images on our servers. The analysis uses both pixel-perfect comparison and CLIP AI models for comprehensive duplicate and similar image detection.
                 </p>
                 <p>
-                  <strong>Data Retention:</strong> Session data is automatically deleted after 24 hours or when you manually clean up your session.
+                  <strong>Automatic Cleanup:</strong> All uploaded photos and analysis data are automatically deleted when you leave the dashboard or refresh the page. This ensures your privacy and prevents any personal data from being stored on our servers.
+                </p>
+                <p>
+                  <strong>Session Management:</strong> When you navigate away from the dashboard, all session data including uploaded photos, analysis results, and temporary files are immediately cleaned up. This automatic cleanup protects your privacy and ensures no data persists beyond your active session.
+                </p>
+                <p>
+                  <strong>Data Retention:</strong> Session data is automatically deleted when you leave the dashboard. No data is retained beyond your active session to ensure maximum privacy protection.
+                </p>
+                <p>
+                  <strong>AI Processing:</strong> Our AI models (CLIP and pixel analysis) process your images locally. No image data is sent to external AI services or third-party APIs.
                 </p>
                 <p>
                   <strong>Third-Party Services:</strong> We use Google OAuth for authentication. Please review Google's privacy policy for information about how they handle your data.
@@ -161,7 +173,9 @@ export default function TermsAndPolicyPage() {
                   <li>Maximum 50MB per individual file</li>
                   <li>Maximum 100MB total per session</li>
                   <li>Supported formats: JPG, PNG, GIF, WebP, BMP, TIFF</li>
-                  <li>Analysis processing time varies based on image count and size</li>
+                  <li>Analysis processing time varies based on image count and size (typically 2-5 minutes)</li>
+                  <li>Two analysis modes: pixel-perfect comparison and AI-powered semantic analysis</li>
+                  <li>Quality assessment includes resolution, sharpness, brightness, contrast, and noise metrics</li>
                 </ul>
                 <p>
                   We reserve the right to modify these limitations at any time with reasonable notice.
@@ -197,7 +211,7 @@ export default function TermsAndPolicyPage() {
                   <strong>Service Availability:</strong> We strive to provide reliable service but cannot guarantee uninterrupted availability. The service is provided "as is" without warranties of any kind.
                 </p>
                 <p>
-                  <strong>Analysis Accuracy:</strong> While our AI strives for accuracy, we cannot guarantee 100% accuracy in duplicate or similar image detection. Users should review results before deleting any photos.
+                  <strong>Analysis Accuracy:</strong> While our AI strives for accuracy using both pixel-perfect comparison (96%+ similarity threshold) and CLIP-based semantic analysis, we cannot guarantee 100% accuracy in duplicate or similar image detection. Users should review results before deleting any photos.
                 </p>
                 <p>
                   <strong>Data Loss:</strong> We are not responsible for any data loss that may occur during the use of our service. Users should maintain backups of their photos.

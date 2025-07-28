@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { FcGoogle } from "react-icons/fc"
-import { Sparkles, Shield, Zap, Users, Star, ArrowRight, CheckCircle, LogOut, Brain, Camera, Download, Search, Filter, Clock, HardDrive, Lock, Eye, Smartphone, Globe, BarChart3, Settings, Palette, RefreshCw, FileImage, Layers, Target, Award, TrendingUp, Sparkles as SparklesIcon } from "lucide-react"
+import { Sparkles, Shield, Zap, Users, Star, ArrowRight, CheckCircle, LogOut, Brain, Camera, Download, Search, Filter, Clock, HardDrive, Lock, Eye, Smartphone, Globe, BarChart3, Settings, Palette, RefreshCw, FileImage, Layers, Target, Award, TrendingUp, Sparkles as SparklesIcon, Trash2 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useAuth } from "@/components/auth-provider"
@@ -93,12 +93,13 @@ export default function FeaturesPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-3">Advanced AI Analysis</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Two powerful analysis modes: exact duplicate detection and AI-powered similar image recognition using CLIP models.
+                    Two powerful analysis modes: exact duplicate detection using pixel-perfect comparison and AI-powered similar image recognition using CLIP models for semantic understanding.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Pixel-perfect duplicate detection</li>
-                    <li>• Semantic similarity analysis</li>
+                    <li>• Pixel-perfect duplicate detection (96%+ similarity)</li>
+                    <li>• CLIP-based semantic similarity analysis</li>
                     <li>• 99.9% accuracy rate</li>
+                    <li>• Real-time processing feedback</li>
                   </ul>
                 </div>
               </div>
@@ -112,12 +113,13 @@ export default function FeaturesPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-3">Smart Quality Assessment</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Automatic evaluation of image quality using multiple metrics to identify the best photos in each group.
+                    Automatic evaluation of image quality using multiple metrics to identify the best photos in each group with detailed scoring.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Resolution analysis</li>
-                    <li>• Sharpness detection</li>
-                    <li>• Brightness & contrast optimization</li>
+                    <li>• Resolution analysis (30% weight)</li>
+                    <li>• Sharpness detection (25% weight)</li>
+                    <li>• Brightness & contrast optimization (35% weight)</li>
+                    <li>• Noise assessment (10% weight)</li>
                   </ul>
                 </div>
               </div>
@@ -131,12 +133,13 @@ export default function FeaturesPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-3">Batch Processing</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Process up to 50 photos simultaneously with real-time progress tracking and background processing.
+                    Process up to 50 photos simultaneously with real-time progress tracking and background processing for optimal performance.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Up to 50 photos per session</li>
                     <li>• Real-time progress updates</li>
                     <li>• Background processing</li>
+                    <li>• Session-based organization</li>
                   </ul>
                 </div>
               </div>
@@ -150,12 +153,13 @@ export default function FeaturesPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-3">Smart File Management</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Comprehensive file handling with automatic cleanup, session management, and secure storage.
+                    Comprehensive file handling with automatic cleanup, session management, and secure storage with privacy-first approach.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Multiple format support</li>
+                    <li>• Multiple format support (JPG, PNG, GIF, WebP, BMP, TIFF)</li>
                     <li>• Automatic session cleanup</li>
                     <li>• Secure file handling</li>
+                    <li>• Privacy-first design</li>
                   </ul>
                 </div>
               </div>
@@ -169,12 +173,13 @@ export default function FeaturesPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-3">Flexible Download Options</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Download selected photos or automatically get the best quality images from each group.
+                    Download selected photos or automatically get the best quality images from each group with organized ZIP packaging.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Selective photo download</li>
                     <li>• Best photos only option</li>
                     <li>• ZIP file packaging</li>
+                    <li>• Organized file structure</li>
                   </ul>
                 </div>
               </div>
@@ -188,12 +193,13 @@ export default function FeaturesPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-3">Space Optimization</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Calculate potential storage savings and optimize your photo library for maximum efficiency.
+                    Calculate potential storage savings and optimize your photo library for maximum efficiency with detailed analytics.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Storage savings calculator</li>
                     <li>• File size optimization</li>
                     <li>• Space usage analytics</li>
+                    <li>• Duplicate percentage tracking</li>
                   </ul>
                 </div>
               </div>
@@ -221,7 +227,7 @@ export default function FeaturesPage() {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Intelligent Grouping</h3>
                     <p className="text-muted-foreground">
-                      Advanced clustering algorithms group similar photos together, making it easy to review and select the best images from each set.
+                      Advanced clustering algorithms using FAISS and DBSCAN group similar photos together, making it easy to review and select the best images from each set with similarity scores.
                     </p>
                   </div>
                 </div>
@@ -233,7 +239,7 @@ export default function FeaturesPage() {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Smart Filtering</h3>
                     <p className="text-muted-foreground">
-                      Filter results by similarity score, file size, quality rating, and more to focus on the most important duplicates.
+                      Filter results by similarity score, file size, quality rating, and more to focus on the most important duplicates and similar images.
                     </p>
                   </div>
                 </div>
@@ -245,7 +251,7 @@ export default function FeaturesPage() {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Detailed Analytics</h3>
                     <p className="text-muted-foreground">
-                      Comprehensive statistics and insights about your photo library, including duplicate percentages and space savings.
+                      Comprehensive statistics and insights about your photo library, including duplicate percentages, space savings, and quality distribution across your photos.
                     </p>
                   </div>
                 </div>
@@ -257,7 +263,7 @@ export default function FeaturesPage() {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Progress Tracking</h3>
                     <p className="text-muted-foreground">
-                      Real-time progress updates with detailed status information, so you always know what's happening with your analysis.
+                      Real-time progress updates with detailed status information, so you always know what's happening with your analysis including current processing stage and estimated completion time.
                     </p>
                   </div>
                 </div>
@@ -270,9 +276,21 @@ export default function FeaturesPage() {
                     <Lock className="h-5 w-5 text-green-500" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Privacy & Security</h3>
+                    <h3 className="text-lg font-semibold mb-2">Complete Privacy Protection</h3>
                     <p className="text-muted-foreground">
-                      Your photos are processed securely with automatic cleanup. No images are permanently stored on our servers.
+                      Your photos are automatically deleted when you leave the dashboard. No data is permanently stored, ensuring complete privacy and security with automatic cleanup mechanisms.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                    <Trash2 className="h-5 w-5 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Automatic Cleanup</h3>
+                    <p className="text-muted-foreground">
+                      All uploaded photos and analysis data are automatically cleaned up when you leave the dashboard, protecting your privacy and ensuring no data persists beyond your active session.
                     </p>
                   </div>
                 </div>
@@ -284,7 +302,7 @@ export default function FeaturesPage() {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Responsive Design</h3>
                     <p className="text-muted-foreground">
-                      Fully responsive interface that works perfectly on desktop, tablet, and mobile devices for photo management anywhere.
+                      Fully responsive interface that works perfectly on desktop, tablet, and mobile devices for photo management anywhere with optimized touch interactions and mobile-friendly controls.
                     </p>
                   </div>
                 </div>
@@ -296,19 +314,7 @@ export default function FeaturesPage() {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Dark Mode Support</h3>
                     <p className="text-muted-foreground">
-                      Beautiful dark and light themes with automatic system preference detection for comfortable photo editing.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
-                    <RefreshCw className="h-5 w-5 text-red-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Session Management</h3>
-                    <p className="text-muted-foreground">
-                      Start over anytime with session management that allows you to upload new photos or change analysis settings.
+                      Beautiful dark and light themes with automatic system preference detection for comfortable photo editing in any lighting condition with consistent visual hierarchy.
                     </p>
                   </div>
                 </div>
@@ -337,7 +343,7 @@ export default function FeaturesPage() {
                   JPG, PNG, GIF, WebP, BMP, TIFF
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Maximum file size: 50MB per file
+                  Maximum file size: 50MB per file, 100MB total per session
                 </p>
               </div>
 
@@ -350,7 +356,7 @@ export default function FeaturesPage() {
                   Up to 50 photos per session
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Processing time: 2-5 minutes
+                  Processing time: 2-5 minutes depending on image count and size
                 </p>
               </div>
 
@@ -358,12 +364,12 @@ export default function FeaturesPage() {
                 <div className="w-16 h-16 rounded-full bg-pink-500/10 flex items-center justify-center mx-auto">
                   <Shield className="h-8 w-8 text-pink-500" />
                 </div>
-                <h3 className="text-xl font-bold">Security</h3>
+                <h3 className="text-xl font-bold">Privacy & Security</h3>
                 <p className="text-muted-foreground">
-                  Local processing
+                  Auto-cleanup on exit
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Automatic file cleanup
+                  No permanent data storage, local processing only
                 </p>
               </div>
             </div>
@@ -389,7 +395,7 @@ export default function FeaturesPage() {
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    AI-powered similarity detection
+                    AI-powered similarity detection (CLIP models)
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
@@ -406,6 +412,14 @@ export default function FeaturesPage() {
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     Modern, intuitive interface
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Automatic privacy cleanup
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Two analysis modes (pixel & AI)
                   </li>
                 </ul>
               </div>
@@ -435,6 +449,14 @@ export default function FeaturesPage() {
                   <li className="flex items-center gap-2">
                     <div className="h-4 w-4 rounded-full bg-muted-foreground/20" />
                     Outdated interfaces
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-4 w-4 rounded-full bg-muted-foreground/20" />
+                    Data privacy concerns
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-4 w-4 rounded-full bg-muted-foreground/20" />
+                    Single analysis mode
                   </li>
                 </ul>
               </div>

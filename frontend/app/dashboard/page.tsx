@@ -366,6 +366,22 @@ export default function UserDashboard() {
       <Header />
       
       <main className="flex-1 container py-8">
+        {/* Session Information */}
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-2">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-blue-700">
+                <strong>Note:</strong> Your progress is saved during this session. If you leave this page or refresh, you'll need to start over with a fresh upload. This is to ensure complete privacy and security.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1">Photo Organization</h1>
           <p className="text-muted-foreground">Upload photos to find duplicates and similar images</p>

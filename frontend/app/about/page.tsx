@@ -94,6 +94,9 @@ export default function AboutPage() {
                     <span className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-full text-sm">Python</span>
                     <span className="px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-sm">Computer Vision</span>
                     <span className="px-3 py-1 bg-orange-500/10 text-orange-500 rounded-full text-sm">UI/UX Design</span>
+                    <span className="px-3 py-1 bg-cyan-500/10 text-cyan-500 rounded-full text-sm">Flask</span>
+                    <span className="px-3 py-1 bg-indigo-500/10 text-indigo-500 rounded-full text-sm">PyTorch</span>
+                    <span className="px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-sm">OpenCV</span>
                   </div>
                 </div>
 
@@ -142,7 +145,7 @@ export default function AboutPage() {
                   </div>
                   <h3 className="text-lg font-bold mb-2">The Inspiration</h3>
                   <p className="text-muted-foreground text-sm">
-                    Like many people, I struggled with organizing thousands of photos across multiple devices. Existing solutions were either too expensive, lacked privacy, or weren't accurate enough. I wanted to create something that was both powerful and accessible to everyone.
+                    Like many people, I struggled with organizing thousands of photos across multiple devices. Existing solutions were either too expensive, lacked privacy, or weren't accurate enough. I wanted to create something that was both powerful and accessible to everyone, with a focus on privacy and user experience.
                   </p>
                 </div>
               </div>
@@ -155,7 +158,7 @@ export default function AboutPage() {
                   </div>
                   <h3 className="text-lg font-bold mb-2">The Vision</h3>
                   <p className="text-muted-foreground text-sm">
-                    I envisioned PickPerfect as a tool that would make photo organization effortless and intelligent. The goal was to create an AI-powered solution that could understand photo content, detect duplicates with high accuracy, and provide a beautiful, intuitive interface that anyone could use.
+                    I envisioned PickPerfect as a tool that would make photo organization effortless and intelligent. The goal was to create an AI-powered solution that could understand photo content, detect duplicates with high accuracy using both pixel-perfect comparison and CLIP models, and provide a beautiful, intuitive interface that anyone could use.
                   </p>
                 </div>
               </div>
@@ -168,7 +171,7 @@ export default function AboutPage() {
                   </div>
                   <h3 className="text-lg font-bold mb-2">The Journey</h3>
                   <p className="text-muted-foreground text-sm">
-                    The journey involved learning advanced computer vision techniques, experimenting with different AI models, and building a full-stack application. From initial prototypes to the current version, each iteration brought new insights and improvements based on user feedback and technological advancements.
+                    The journey involved learning advanced computer vision techniques, experimenting with different AI models including CLIP for semantic understanding, and building a full-stack application with Flask backend and Next.js frontend. From initial prototypes to the current version, each iteration brought new insights and improvements based on user feedback and technological advancements.
                   </p>
                 </div>
               </div>
@@ -193,7 +196,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="font-bold mb-2">Frontend</h3>
                 <p className="text-sm text-muted-foreground">
-                  Next.js 15, React 19, TypeScript, Tailwind CSS
+                  Next.js 15, React 19, TypeScript, Tailwind CSS, Supabase Auth
                 </p>
               </Card>
 
@@ -203,7 +206,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="font-bold mb-2">Backend</h3>
                 <p className="text-sm text-muted-foreground">
-                  Flask, Python, PyTorch, OpenCV
+                  Flask, Python, PyTorch, OpenCV, scikit-learn, FAISS
                 </p>
               </Card>
 
@@ -213,7 +216,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="font-bold mb-2">AI/ML</h3>
                 <p className="text-sm text-muted-foreground">
-                  CLIP Models, FAISS, scikit-learn
+                  CLIP Models, FAISS, scikit-learn, ResNet-50, DBSCAN Clustering
                 </p>
               </Card>
 
@@ -223,7 +226,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="font-bold mb-2">Infrastructure</h3>
                 <p className="text-sm text-muted-foreground">
-                  Supabase, Vercel, Local Processing
+                  Supabase, Vercel, Local Processing, Auto-cleanup
                 </p>
               </Card>
             </div>
@@ -248,7 +251,7 @@ export default function AboutPage() {
                 <div>
                   <h3 className="text-xl font-bold mb-2">User-Centric Design</h3>
                   <p className="text-muted-foreground">
-                    Every feature in PickPerfect is designed with the user in mind. I believe in creating intuitive interfaces that require minimal learning curve. User feedback is invaluable - it drives every major update and helps ensure the tool solves real problems people face.
+                    Every feature in PickPerfect is designed with the user in mind. I believe in creating intuitive interfaces that require minimal learning curve. The application offers two analysis modes (pixel-perfect and AI-powered) to cater to different user needs. User feedback is invaluable - it drives every major update and helps ensure the tool solves real problems people face.
                   </p>
                 </div>
               </div>
@@ -260,7 +263,7 @@ export default function AboutPage() {
                 <div>
                   <h3 className="text-xl font-bold mb-2">Privacy First</h3>
                   <p className="text-muted-foreground">
-                    Privacy is fundamental to PickPerfect. Your photos are processed locally and never stored on our servers. In an age where data privacy is crucial, I believe users should have complete control over their personal photos and data.
+                    Privacy is fundamental to PickPerfect. Your photos are processed locally and never stored on our servers. All files are automatically cleaned up when you leave the dashboard. In an age where data privacy is crucial, I believe users should have complete control over their personal photos and data.
                   </p>
                 </div>
               </div>
@@ -272,7 +275,7 @@ export default function AboutPage() {
                 <div>
                   <h3 className="text-xl font-bold mb-2">Continuous Innovation</h3>
                   <p className="text-muted-foreground">
-                    The AI landscape is constantly evolving, and I'm committed to staying at the forefront. I regularly experiment with new models, techniques, and technologies to ensure PickPerfect remains cutting-edge while maintaining reliability and performance.
+                    The AI landscape is constantly evolving, and I'm committed to staying at the forefront. I regularly experiment with new models, techniques, and technologies to ensure PickPerfect remains cutting-edge while maintaining reliability and performance. The integration of CLIP models for semantic understanding is just one example of this commitment to innovation.
                   </p>
                 </div>
               </div>
@@ -297,7 +300,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-lg font-bold mb-2">Cloud Integration</h3>
                 <p className="text-muted-foreground text-sm">
-                  Expanding cloud storage integrations to include Google Drive, Dropbox, OneDrive, and other popular platforms for seamless photo management across devices.
+                  Expanding cloud storage integrations to include Google Drive, Dropbox, OneDrive, and other popular platforms for seamless photo management across devices and automatic backup capabilities.
                 </p>
               </Card>
 
@@ -307,7 +310,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-lg font-bold mb-2">Advanced AI</h3>
                 <p className="text-muted-foreground text-sm">
-                  Implementing advanced AI models for better duplicate detection, content-based organization, and intelligent photo tagging to make organization even more effortless.
+                  Implementing more advanced AI models for better duplicate detection, content-based organization, and intelligent photo tagging. Exploring newer CLIP variants and custom fine-tuned models for even more accurate similarity detection.
                 </p>
               </Card>
 
@@ -317,7 +320,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-lg font-bold mb-2">Community Features</h3>
                 <p className="text-muted-foreground text-sm">
-                  Building a community of users who can share organization tips, collaborate on photo projects, and contribute to making PickPerfect even better through feedback and suggestions.
+                  Building a community of users who can share organization tips, collaborate on photo projects, and contribute to making PickPerfect even better through feedback and suggestions. Planning to add user forums and feature request voting systems.
                 </p>
               </Card>
             </div>

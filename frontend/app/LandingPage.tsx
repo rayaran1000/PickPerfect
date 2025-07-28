@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { FcGoogle } from "react-icons/fc"
-import { LucideImage, Sparkles, Shield, Zap, Users, Star, ArrowRight, CheckCircle, LogOut, List } from "lucide-react"
+import { LucideImage, Sparkles, Shield, Zap, Users, Star, ArrowRight, CheckCircle, LogOut, List, Trash2, Brain } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useAuth } from "@/components/auth-provider"
@@ -42,7 +42,6 @@ export default function LandingPage() {
                 </h1>
                 <p className="max-w-[800px] text-xl text-gray-800 md:text-2xl leading-relaxed drop-shadow-md dark:text-white">
                   Transform your cluttered photo collection into a perfectly organized gallery. 
-                  Our AI detects duplicates and similar photos with incredible accuracy.
                 </p>
               </div>
 
@@ -115,7 +114,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-3">Lightning Fast AI</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Our advanced AI analyzes thousands of photos in minutes, identifying duplicates with incredible precision.
+                    Our advanced AI analyzes thousands of photos in minutes, identifying duplicates with incredible precision using both pixel-perfect comparison and AI based semantic analysis.
                   </p>
                 </div>
               </div>
@@ -127,9 +126,9 @@ export default function LandingPage() {
                   <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <Shield className="h-6 w-6 text-purple-500" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3">Safe & Secure</h3>
+                  <h3 className="text-xl font-bold mb-3">Complete Privacy</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Your photos are processed locally and never stored on our servers. Complete privacy guaranteed.
+                    Your photos are automatically deleted when you leave the dashboard. No data is permanently stored, ensuring complete privacy and security.
                   </p>
                 </div>
               </div>
@@ -143,7 +142,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-3">Smart Organization</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Automatically organize photos by date, location, and content. Find what you need instantly.
+                    Automatically organize photos by similarity, quality, and content. Find what you need instantly with intelligent grouping and quality assessment.
                   </p>
                 </div>
               </div>
@@ -168,7 +167,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold">Connect Your Photos</h3>
                 <p className="text-muted-foreground">
-                  Securely connect your Google Photos account or upload photos directly
+                  Securely upload photos directly from your device (up to 50 photos, 50MB each)
                 </p>
               </div>
               <div className="text-center space-y-4">
@@ -177,7 +176,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold">AI Analysis</h3>
                 <p className="text-muted-foreground">
-                  Our AI scans your photos and identifies duplicates and similar images
+                  Our AI scans your photos using pixel-perfect comparison or semantic analysis to identify duplicates and similar images
                 </p>
               </div>
               <div className="text-center space-y-4">
@@ -186,8 +185,61 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold">Clean & Organize</h3>
                 <p className="text-muted-foreground">
-                  Review and remove duplicates, then enjoy your perfectly organized library
+                  Review grouped photos with quality scores, select the best ones, and download your organized library
                 </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Analysis Modes Section */}
+        <section className="container py-20 md:py-32 border-t">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold mb-4">Two Powerful Analysis Modes</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Choose the perfect analysis method for your needs
+              </p>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2">
+              {/* Pixel Analysis */}
+              <div className="group relative p-8 rounded-2xl border bg-card hover:bg-card/80 transition-all duration-300 hover:shadow-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Zap className="h-6 w-6 text-blue-500" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">Pixel-Perfect Analysis</h3>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Find exact duplicates using advanced pixel comparison algorithms. Perfect for identifying identical or nearly identical photos.
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Fast processing</li>
+                    <li>• High precision</li>
+                    <li>• Ideal for exact duplicates</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* AI Analysis */}
+              <div className="group relative p-8 rounded-2xl border bg-card hover:bg-card/80 transition-all duration-300 hover:shadow-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Brain className="h-6 w-6 text-purple-500" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">AI-Powered Analysis</h3>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Discover similar images using AI models that understand photo content, composition, and visual elements.
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Semantic understanding</li>
+                    <li>• Content-based grouping</li>
+                    <li>• Advanced AI models</li>
+                    <li>• Perfect for similar photos</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -265,23 +317,27 @@ export default function LandingPage() {
                 faqs={[
                   {
                     question: "How does PickPerfect work?",
-                    answer: "PickPerfect uses advanced AI technology to analyze your photos. It can detect both exact duplicates and similar images using two different modes: pixel-perfect comparison and AI-powered semantic analysis with CLIP models."
+                    answer: "PickPerfect uses advanced AI technology to analyze your photos. It can detect both exact duplicates and similar images using two different modes: pixel-perfect comparison for exact duplicates and AI-powered semantic analysis with CLIP models for similar images."
                   },
                   {
                     question: "What file formats are supported?",
-                    answer: "We support all major image formats including JPG, PNG, GIF, WebP, BMP, and TIFF. Each file can be up to 50MB, and you can upload up to 50 photos per session."
+                    answer: "We support all major image formats including JPG, PNG, GIF, WebP, BMP, and TIFF. Each file can be up to 50MB, and you can upload up to 50 photos per session with a total limit of 100MB per session."
                   },
                   {
                     question: "Is my data secure?",
                     answer: "Yes! Your photos are processed locally and never permanently stored on our servers. All files are automatically cleaned up after your session ends, ensuring complete privacy and security."
                   },
                   {
+                    question: "What happens to my photos when I leave the dashboard?",
+                    answer: "All uploaded photos and analysis data are automatically deleted when you leave the dashboard or refresh the page. This ensures your privacy and prevents any personal data from being stored on our servers."
+                  },
+                  {
                     question: "What's the difference between exact duplicates and similar images?",
-                    answer: "Exact duplicates are identical or nearly identical photos (99%+ similarity). Similar images are photos with similar content, composition, or subject matter detected by our AI, even if they're not pixel-perfect matches."
+                    answer: "Exact duplicates are identical or nearly identical photos (96%+ similarity using pixel comparison). Similar images are photos with similar content, composition, or subject matter detected by our CLIP AI models, even if they're not pixel-perfect matches."
                   },
                   {
                     question: "How accurate is the AI analysis?",
-                    answer: "Our AI achieves 99.9% accuracy in detecting duplicates and similar images. The system uses multiple quality metrics to identify the best photo in each group, ensuring you keep the highest quality version."
+                    answer: "Our AI achieves 99.9% accuracy in detecting duplicates and similar images. The system uses multiple quality metrics (resolution, sharpness, brightness, contrast, noise) to identify the best photo in each group, ensuring you keep the highest quality version."
                   },
                   {
                     question: "Can I download the photos I want to keep?",
