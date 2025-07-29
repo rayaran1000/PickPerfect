@@ -65,6 +65,8 @@ export default function UserDashboard() {
   const [showPreviewPage, setShowPreviewPage] = useState(false)
   const [resetKey, setResetKey] = useState(0) // Add reset key for component resets
   const [showResetMessage, setShowResetMessage] = useState(false) // Add reset message state
+  const [isResetting, setIsResetting] = useState(false) // Add reset loading state
+  const [isStartingOver, setIsStartingOver] = useState(false) // Add start over loading state
 
   // Get user info from Google OAuth using the correct structure
   const userEmail = user?.email
@@ -142,6 +144,10 @@ export default function UserDashboard() {
   const handleAnalysisComplete = (result: AnalysisResult) => {
     console.log('Analysis result received:', result)
     setAnalysisResult(result)
+    
+    // Reset analysis state
+    setIsAnalyzing(false)
+    setAnalysisProgress(0)
     
     // Set the session ID from the analysis result
     setSessionId(result.session_id)
@@ -360,55 +366,73 @@ export default function UserDashboard() {
   }
 
   const resetDashboard = async () => {
-    // Clean up current session if available
-    if (sessionId && user?.id) {
-      try {
-        await apiService.cleanupSession(sessionId, user.id)
-        console.log('Session cleaned up before starting over')
-      } catch (error) {
-        console.error('Error cleaning up session:', error)
-        // Continue with start over even if cleanup fails
+    setIsResetting(true)
+    console.log('Starting dashboard reset, isResetting set to true')
+    
+    try {
+      // Clean up current session if available
+      if (sessionId && user?.id) {
+        try {
+          await apiService.cleanupSession(sessionId, user.id)
+          console.log('Session cleaned up before starting over')
+        } catch (error) {
+          console.error('Error cleaning up session:', error)
+          // Continue with start over even if cleanup fails
+        }
       }
+      
+      // Clean up any object URLs to prevent memory leaks
+      const allPhotos = [...uploadedPhotos, ...localPhotos, ...drivePhotos]
+      allPhotos.forEach(photo => {
+        if (photo.preview && photo.preview.startsWith('blob:')) {
+          URL.revokeObjectURL(photo.preview)
+        }
+      })
+      
+      // Reset all state variables to initial values
+      setUploadedPhotos([])
+      setLocalPhotos([])
+      setDrivePhotos([])
+      setSelectedPhotos(new Set())
+      setCurrentGroupIndex(0)
+      setAnalysisResult(null)
+      setPhotoGroups([])
+      setSessionId(null)
+      setAnalysisType('pixel') // Reset to default analysis type
+      setActiveTab("upload")
+      setShowAnalysisControls(false)
+      setShowUploadButton(false)
+      setIsUploading(false)
+      setUploadProgress(0)
+      setIsAnalyzing(false)
+      setAnalysisProgress(0)
+      setShowPreviewPage(false)
+      setResetKey(prev => prev + 1) // Increment reset key to trigger component resets
+      
+      // Show reset success message
+      setShowResetMessage(true)
+      setTimeout(() => setShowResetMessage(false), 3000) // Hide after 3 seconds
+      
+      console.log('Dashboard reset to initial state')
+    } catch (error) {
+      console.error('Error during dashboard reset:', error)
+    } finally {
+      setIsResetting(false)
+      console.log('Dashboard reset completed, isResetting set to false')
     }
-    
-    // Clean up any object URLs to prevent memory leaks
-    const allPhotos = [...uploadedPhotos, ...localPhotos, ...drivePhotos]
-    allPhotos.forEach(photo => {
-      if (photo.preview && photo.preview.startsWith('blob:')) {
-        URL.revokeObjectURL(photo.preview)
-      }
-    })
-    
-    // Reset all state variables to initial values
-    setUploadedPhotos([])
-    setLocalPhotos([])
-    setDrivePhotos([])
-    setSelectedPhotos(new Set())
-    setCurrentGroupIndex(0)
-    setAnalysisResult(null)
-    setPhotoGroups([])
-    setSessionId(null)
-    setAnalysisType('pixel') // Reset to default analysis type
-    setActiveTab("upload")
-    setShowAnalysisControls(false)
-    setShowUploadButton(false)
-    setIsUploading(false)
-    setUploadProgress(0)
-    setIsAnalyzing(false)
-    setAnalysisProgress(0)
-    setShowPreviewPage(false)
-    setResetKey(prev => prev + 1) // Increment reset key to trigger component resets
-    
-    // Show reset success message
-    setShowResetMessage(true)
-    setTimeout(() => setShowResetMessage(false), 3000) // Hide after 3 seconds
-    
-    console.log('Dashboard reset to initial state')
   }
 
   const handleStartOver = async () => {
     if (confirm("Are you sure you want to start over? This will discard all current photos and analysis.")) {
-      await resetDashboard()
+      setIsStartingOver(true) // Set loading state to true
+      try {
+        await resetDashboard()
+      } catch (error) {
+        console.error('Error during start over:', error)
+      } finally {
+        setIsStartingOver(false) // Ensure loading state is reset
+        console.log('Start over completed, isStartingOver set to false')
+      }
     }
   }
 
@@ -672,7 +696,7 @@ export default function UserDashboard() {
                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
                    <p className="text-sm text-muted-foreground">
                      {uploadProgress < 30 ? "Preparing files..." : 
-                      uploadProgress < 60 ? "Uploading to storage..." : 
+                      uploadProgress < 60 ? "Uploading..." : 
                       "Finalizing upload..."}
                    </p>
                  </div>
@@ -830,11 +854,20 @@ export default function UserDashboard() {
                    <Button 
                      variant="outline"
                      onClick={resetDashboard}
-                     disabled={isAnalyzing}
+                     disabled={isAnalyzing || isResetting}
                      className="gap-2"
                    >
-                     <RotateCcw className="h-4 w-4" />
-                     Re-upload
+                     {isResetting ? (
+                       <>
+                         <Loader2 className="h-4 w-4 animate-spin" />
+                         Resetting...
+                       </>
+                     ) : (
+                       <>
+                         <RotateCcw className="h-4 w-4" />
+                         Re-upload
+                       </>
+                     )}
                    </Button>
                  </div>
 
@@ -960,14 +993,25 @@ export default function UserDashboard() {
                       )}
                     </CardDescription>
                   </div>
+
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={handleStartOver}
+                    disabled={isAnalyzing || isResetting || isStartingOver}
                     className="gap-2"
                   >
-                    <RotateCcw className="h-4 w-4" />
-                    Start Over
+                    {isStartingOver ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Starting Over...
+                      </>
+                    ) : (
+                      <>
+                        <RotateCcw className="h-4 w-4" />
+                        Start Over
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardHeader>
