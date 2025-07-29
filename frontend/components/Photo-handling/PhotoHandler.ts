@@ -6,9 +6,9 @@ export interface UploadedPhoto {
   preview: string
   name: string
   size: string
-  // Add optional Drive-specific properties
-  driveFileId?: string
-  driveDownloadUrl?: string
+  source: 'local' | 'drive'
+  type: string
+  downloadUrl?: string
 }
 
 export interface PhotoHandlerReturn {
@@ -37,7 +37,9 @@ export const usePhotoHandler = (): PhotoHandlerReturn => {
         file,
         preview: URL.createObjectURL(file),
         name: file.name,
-        size: formatFileSize(file.size)
+        size: formatFileSize(file.size),
+        source: 'local' as const,
+        type: file.type
       }))
 
     setUploadedPhotos(prev => [...prev, ...newPhotos])
