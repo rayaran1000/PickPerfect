@@ -2,8 +2,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Loader2, CheckCircle, AlertCircle, ExternalLink, FolderOpen, Upload } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Loader2, CheckCircle, AlertCircle, ExternalLink, FolderOpen, Upload, X } from "lucide-react"
+import { useEffect, useState, useCallback } from "react"
 import { useAuth } from "@/components/auth-provider"
 import { UploadedPhoto } from "./PhotoHandler"
 
@@ -45,19 +45,14 @@ export function GoogleDrivePicker({
       } else if (event.data.type === 'drive-auth-error') {
         setIsConnecting(false)
         setError(event.data.error || 'Failed to connect to Google Drive')
-      } else if (event.data.type === 'drive-files-selected') {
-        // Handle selected files from popup
-        const selectedFiles = event.data.files
-        if (selectedFiles && selectedFiles.length > 0) {
-          setSelectedDrivePhotos(selectedFiles)
-          setSuccess(`Selected ${selectedFiles.length} images from Google Drive`)
-          
-          // Notify parent component
-          if (onPhotosChange) {
-            onPhotosChange(selectedFiles)
-          }
-        }
-      }
+             } else if (event.data.type === 'drive-files-selected') {
+         // Handle selected files from popup
+         const selectedFiles = event.data.files
+         if (selectedFiles && selectedFiles.length > 0) {
+           setSelectedDrivePhotos(selectedFiles)
+           setSuccess(`Selected ${selectedFiles.length} images from Google Drive`)
+         }
+       }
     }
 
     window.addEventListener('message', handleMessage)
@@ -155,7 +150,7 @@ export function GoogleDrivePicker({
     setSuccess(null)
   }
 
-  const handleClearSelected = () => {
+  const handleClearSelected = useCallback(() => {
     // Clean up preview URLs
     selectedDrivePhotos.forEach(photo => {
       if (photo.preview && photo.preview.startsWith('blob:')) {
@@ -166,12 +161,25 @@ export function GoogleDrivePicker({
     setSelectedDrivePhotos([])
     setError(null)
     setSuccess(null)
-    
-    // Notify parent component
+  }, [selectedDrivePhotos])
+
+  const handleRemovePhoto = useCallback((id: string) => {
+    setSelectedDrivePhotos(prev => {
+      const photo = prev.find(p => p.id === id)
+      if (photo && photo.preview && photo.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(photo.preview)
+      }
+      const newPhotos = prev.filter(p => p.id !== id)
+      return newPhotos
+    })
+  }, [])
+
+  // Notify parent component when selectedDrivePhotos changes
+  useEffect(() => {
     if (onPhotosChange) {
-      onPhotosChange([])
+      onPhotosChange(selectedDrivePhotos)
     }
-  }
+  }, [selectedDrivePhotos, onPhotosChange])
 
   return (
     <div className={className}>
@@ -281,6 +289,14 @@ export function GoogleDrivePicker({
                               alt={photo.name}
                               className="w-full h-full object-contain"
                             />
+                            {/* Individual Remove Button */}
+                            <button
+                              onClick={() => handleRemovePhoto(photo.id)}
+                              className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                              title="Remove photo"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
                           </div>
                           <div className="mt-1">
                             <p className="text-xs font-medium truncate">{photo.name}</p>

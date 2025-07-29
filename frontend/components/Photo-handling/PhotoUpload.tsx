@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Upload, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { Upload, Loader2, CheckCircle, AlertCircle, X } from "lucide-react"
 import { UploadedPhoto, usePhotoHandler } from "@/components/Photo-handling/PhotoHandler"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/components/auth-provider"
@@ -19,7 +19,8 @@ export function PhotoUpload({ onPhotosChange, maxPhotos, className, resetKey }: 
     fileInputRef,
     handleFileSelect,
     triggerFileSelect,
-    clearAllPhotos
+    clearAllPhotos,
+    removePhoto
   } = usePhotoHandler()
 
   const [error, setError] = useState<string | null>(null)
@@ -124,6 +125,14 @@ export function PhotoUpload({ onPhotosChange, maxPhotos, className, resetKey }: 
                         alt={photo.name}
                         className="w-full h-full object-contain"
                       />
+                      {/* Individual Remove Button */}
+                      <button
+                        onClick={() => removePhoto(photo.id)}
+                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        title="Remove photo"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
                     </div>
                     <div className="mt-1">
                       <p className="text-xs font-medium truncate">{photo.name}</p>
