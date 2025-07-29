@@ -119,7 +119,7 @@ export default function UserDashboard() {
     setShowUploadButton(allPhotos.length > 0)
   }, [localPhotos, drivePhotos])
 
-  // Cleanup function to prevent memory leaks
+  // Cleanup function to prevent memory leaks - only run on unmount
   useEffect(() => {
     return () => {
       // Clean up any object URLs when component unmounts
@@ -129,7 +129,7 @@ export default function UserDashboard() {
         }
       })
     }
-  }, [uploadedPhotos])
+  }, []) // Remove uploadedPhotos dependency to prevent premature cleanup
 
   const handleLocalPhotosChange = useCallback((photos: UploadedPhoto[]) => {
     setLocalPhotos(photos)
@@ -249,6 +249,14 @@ export default function UserDashboard() {
       }
     }
 
+    // Clean up any object URLs to prevent memory leaks
+    const allPhotos = [...uploadedPhotos, ...localPhotos, ...drivePhotos]
+    allPhotos.forEach(photo => {
+      if (photo.preview && photo.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(photo.preview)
+      }
+    })
+
     // Sign out (this will also clean up all user files)
     await signOut()
     router.push("/")
@@ -364,7 +372,8 @@ export default function UserDashboard() {
     }
     
     // Clean up any object URLs to prevent memory leaks
-    uploadedPhotos.forEach(photo => {
+    const allPhotos = [...uploadedPhotos, ...localPhotos, ...drivePhotos]
+    allPhotos.forEach(photo => {
       if (photo.preview && photo.preview.startsWith('blob:')) {
         URL.revokeObjectURL(photo.preview)
       }
