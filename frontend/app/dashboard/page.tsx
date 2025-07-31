@@ -564,6 +564,32 @@ export default function UserDashboard() {
     <div className="flex min-h-screen flex-col">
       <Header />
       
+      {/* Security Notice - Prominently displayed at the top */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-blue-200 dark:border-blue-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
+                <svg className="h-5 w-5 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                Security Recommendation
+              </h3>
+              <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+                <p>
+                  <strong>Important:</strong> For your privacy and security, we highly recommend signing out when you're done using PickPerfect. 
+                  This ensures that all your uploaded files are securely deleted from our servers.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <main className="flex-1 container py-8">
         {/* Session Information */}
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -632,559 +658,559 @@ export default function UserDashboard() {
                   Choose how you want to analyze your photos
                 </CardDescription>
               </CardHeader>
-                             <CardContent>
-                 <AnalysisTypeSelector
-                   selectedType={analysisType}
-                   onTypeChange={setAnalysisType}
-                 />
-                 
-                 {/* Info about analysis type */}
-                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                   <div className="flex items-start gap-2">
-                     <div className="flex-shrink-0 mt-0.5">
-                       <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                       </svg>
-                     </div>
-                     <div className="flex-1">
-                       <p className="text-sm text-blue-700">
-                         <strong>Important:</strong> The analysis type cannot be changed after uploading images. 
-                         If you want to use a different analysis type, you'll need to re-upload your photos.
-                       </p>
-                     </div>
-                   </div>
-                 </div>
-               </CardContent>
-            </Card>
+                              <CardContent>
+                  <AnalysisTypeSelector
+                    selectedType={analysisType}
+                    onTypeChange={setAnalysisType}
+                  />
+                  
+                  {/* Info about analysis type */}
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 mt-0.5">
+                        <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-blue-700">
+                          <strong>Important:</strong> The analysis type cannot be changed after uploading images. 
+                          If you want to use a different analysis type, you'll need to re-upload your photos.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+             </Card>
 
-            {/* Upload Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <PhotoUpload
-                onPhotosChange={handleLocalPhotosChange}
-                maxPhotos={50}
-                resetKey={resetKey}
-              />
-              <GoogleDrivePicker
-                onPhotosChange={handleDrivePhotosChange}
-                maxPhotos={50}
-                resetKey={resetKey}
-              />
-            </div>
+             {/* Upload Cards */}
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+               <PhotoUpload
+                 onPhotosChange={handleLocalPhotosChange}
+                 maxPhotos={50}
+                 resetKey={resetKey}
+               />
+               <GoogleDrivePicker
+                 onPhotosChange={handleDrivePhotosChange}
+                 maxPhotos={50}
+                 resetKey={resetKey}
+               />
+             </div>
 
-            {/* Upload Button */}
-            {showUploadButton && !isUploading && (
-              <div className="mt-6 text-center">
-                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    <strong>Ready to upload:</strong> {uploadedPhotos.length} photos selected 
-                    ({localPhotos.length} local, {drivePhotos.length} from Drive)
-                  </p>
-                </div>
-                <Button 
-                  onClick={handleUploadAllPhotos}
-                  className="px-8"
-                >
-                  Upload All Photos to Storage
-                </Button>
-              </div>
-            )}
-
-                         {/* Upload Progress */}
-             {isUploading && (
-               <div className="mt-6 space-y-4">
-                 <div className="text-center">
-                   <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-                   <p className="text-sm text-muted-foreground">
-                     {uploadProgress < 30 ? "Preparing files..." : 
-                      uploadProgress < 60 ? "Uploading..." : 
-                      "Finalizing upload..."}
+             {/* Upload Button */}
+             {showUploadButton && !isUploading && (
+               <div className="mt-6 text-center">
+                 <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                   <p className="text-sm text-blue-700">
+                     <strong>Ready to upload:</strong> {uploadedPhotos.length} photos selected 
+                     ({localPhotos.length} local, {drivePhotos.length} from Drive)
                    </p>
                  </div>
-                 <div className="space-y-2">
-                   <div className="flex justify-between text-sm">
-                     <span>Progress</span>
-                     <span>{uploadProgress}%</span>
-                   </div>
-                   <Progress value={uploadProgress} className="w-full" />
-                 </div>
+                 <Button 
+                   onClick={handleUploadAllPhotos}
+                   className="px-8"
+                 >
+                   Upload All Photos to Storage
+                 </Button>
                </div>
              )}
 
-             {/* Analysis Info after Upload */}
-             {showPreviewPage && !isUploading && (
-               <div className="mt-6">
-                 <Card>
-                   <CardHeader>
-                     <CardTitle className="flex items-center gap-2">
-                       <Brain className="h-5 w-5" />
-                       Analysis Configuration
-                     </CardTitle>
-                     <CardDescription>
-                       Your photos are ready for analysis
-                     </CardDescription>
-                   </CardHeader>
-                   <CardContent>
-                     <div className="space-y-4">
-                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                         <div className="flex items-center gap-2">
-                           <div className={`w-3 h-3 rounded-full ${analysisType === 'ai' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
-                           <span className="font-medium">
-                             {analysisType === 'ai' ? 'AI-Powered Analysis' : 'Pixel-Perfect Analysis'}
-                           </span>
-                         </div>
-                         <span className="text-sm text-muted-foreground">
-                           {analysisType === 'ai' 
-                             ? 'Finds similar images using AI' 
-                             : 'Finds exact duplicates only'
-                           }
-                         </span>
-                       </div>
-                       
-                       <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                         <div className="flex items-start gap-2">
-                           <div className="flex-shrink-0 mt-0.5">
-                             <svg className="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                             </svg>
-                           </div>
-                           <div className="flex-1">
-                             <p className="text-sm text-yellow-700">
-                               <strong>Note:</strong> To change the analysis type, you'll need to re-upload your photos using the "Re-upload" button.
-                             </p>
-                           </div>
-                         </div>
-                       </div>
+                          {/* Upload Progress */}
+              {isUploading && (
+                <div className="mt-6 space-y-4">
+                  <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      {uploadProgress < 30 ? "Preparing files..." : 
+                       uploadProgress < 60 ? "Uploading..." : 
+                       "Finalizing upload..."}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Progress</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <Progress value={uploadProgress} className="w-full" />
+                  </div>
+                </div>
+              )}
+
+              {/* Analysis Info after Upload */}
+              {showPreviewPage && !isUploading && (
+                <div className="mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Brain className="h-5 w-5" />
+                        Analysis Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Your photos are ready for analysis
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${analysisType === 'ai' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
+                            <span className="font-medium">
+                              {analysisType === 'ai' ? 'AI-Powered Analysis' : 'Pixel-Perfect Analysis'}
+                            </span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            {analysisType === 'ai' 
+                              ? 'Finds similar images using AI' 
+                              : 'Finds exact duplicates only'
+                            }
+                          </span>
+                        </div>
+                        
+                        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <div className="flex-shrink-0 mt-0.5">
+                              <svg className="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-yellow-700">
+                                <strong>Note:</strong> To change the analysis type, you'll need to re-upload your photos using the "Re-upload" button.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </TabsContent>
+
+                      <TabsContent value="preview" className="space-y-4">
+              {/* Analysis Type Info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="h-5 w-5" />
+                    Analysis Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Your photos are ready for analysis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <AnalysisTypeSelector
+                      selectedType={analysisType}
+                      onTypeChange={() => {}} // No-op function since it's disabled
+                      disabled={true}
+                    />
+                    
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <div className="flex-shrink-0 mt-0.5">
+                          <svg className="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-yellow-700">
+                            <strong>Note:</strong> To change the analysis type, you'll need to re-upload your photos using the "Re-upload" button.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5" />
+                    Photo Preview
+                  </CardTitle>
+                  <CardDescription>
+                    Review your {uploadedPhotos.length} photos before starting analysis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Photo Grid */}
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {uploadedPhotos.map((photo) => (
+                      <div key={photo.id} className="relative group">
+                        <div className="aspect-square rounded-lg overflow-hidden border bg-transparent">
+                          <img
+                            src={photo.preview}
+                            alt={photo.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="mt-1">
+                          <p className="text-xs font-medium truncate">{photo.name}</p>
+                          <p className="text-xs text-muted-foreground">{photo.size}</p>
+                          <p className="text-xs text-blue-600">{photo.source}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                                  {/* Analysis Controls */}
+                  <div className="flex gap-3 pt-4">
+                    <Button 
+                      onClick={handleStartAnalysis}
+                      disabled={isAnalyzing || uploadedPhotos.length === 0}
+                      className="flex-1"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-4 w-4 mr-2" />
+                          Start Analysis
+                        </>
+                      )}
+                    </Button>
+                    
+                    {/* Re-upload Button */}
+                    <Button 
+                      variant="outline"
+                      onClick={resetDashboard}
+                      disabled={isAnalyzing || isResetting}
+                      className="gap-2"
+                    >
+                      {isResetting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Resetting...
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw className="h-4 w-4" />
+                          Re-upload
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                 {isAnalyzing && (
+                   <div className="space-y-2">
+                     <div className="flex justify-between text-sm">
+                       <span>Processing photos...</span>
+                       <span>{analysisProgress}%</span>
                      </div>
-                   </CardContent>
-                 </Card>
-               </div>
-             )}
-          </TabsContent>
+                     <Progress value={analysisProgress} className="w-full" />
+                   </div>
+                 )}
+               </CardContent>
+             </Card>
+           </TabsContent>
 
-                     <TabsContent value="preview" className="space-y-4">
-             {/* Analysis Type Info */}
+           <TabsContent value="processing" className="space-y-4">
              <Card>
                <CardHeader>
                  <CardTitle className="flex items-center gap-2">
                    <Brain className="h-5 w-5" />
-                   Analysis Configuration
+                   AI Analysis Complete
                  </CardTitle>
                  <CardDescription>
-                   Your photos are ready for analysis
-                 </CardDescription>
-               </CardHeader>
-               <CardContent>
-                 <div className="space-y-4">
-                   <AnalysisTypeSelector
-                     selectedType={analysisType}
-                     onTypeChange={() => {}} // No-op function since it's disabled
-                     disabled={true}
-                   />
-                   
-                   <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                     <div className="flex items-start gap-2">
-                       <div className="flex-shrink-0 mt-0.5">
-                         <svg className="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                         </svg>
-                       </div>
-                       <div className="flex-1">
-                         <p className="text-sm text-yellow-700">
-                           <strong>Note:</strong> To change the analysis type, you'll need to re-upload your photos using the "Re-upload" button.
-                         </p>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               </CardContent>
-             </Card>
-
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center gap-2">
-                   <Upload className="h-5 w-5" />
-                   Photo Preview
-                 </CardTitle>
-                 <CardDescription>
-                   Review your {uploadedPhotos.length} photos before starting analysis
+                   Your photos have been analyzed by our AI
                  </CardDescription>
                </CardHeader>
                <CardContent className="space-y-4">
-                 {/* Photo Grid */}
-                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                   {uploadedPhotos.map((photo) => (
-                     <div key={photo.id} className="relative group">
-                       <div className="aspect-square rounded-lg overflow-hidden border bg-transparent">
-                         <img
-                           src={photo.preview}
-                           alt={photo.name}
-                           className="w-full h-full object-contain"
-                         />
-                       </div>
-                       <div className="mt-1">
-                         <p className="text-xs font-medium truncate">{photo.name}</p>
-                         <p className="text-xs text-muted-foreground">{photo.size}</p>
-                         <p className="text-xs text-blue-600">{photo.source}</p>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
+                                  {analysisResult && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                        <Check className="h-5 w-5" />
+                        <span>Analysis completed successfully!</span>
+                      </div>
+                      
+                      {/* Analysis Type Info */}
+                      <div className="p-4 border rounded-lg bg-gray-50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Brain className="h-5 w-5 text-gray-600" />
+                            <span className="font-medium">Analysis Type Used:</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${analysisType === 'ai' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
+                            <span className="font-medium">
+                              {analysisType === 'ai' ? 'AI-Powered Analysis' : 'Pixel-Perfect Analysis'}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {analysisType === 'ai' 
+                            ? 'Used AI to find similar images based on visual content and features'
+                            : 'Found exact pixel-perfect duplicates only'
+                          }
+                        </p>
+                      </div>
+                      
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <div className="p-4 border rounded-lg text-center">
+                          <div className="text-2xl font-bold text-primary">
+                            {analysisResult.result.statistics.total_images}
+                          </div>
+                          <div className="text-sm text-muted-foreground">Total Photos</div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {analysisResult.result.statistics.total_groups}
+                          </div>
+                          <div className="text-sm text-muted-foreground">Groups Found</div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <div className="text-2xl font-bold text-orange-600">
+                            {analysisType === 'ai' 
+                              ? analysisResult.result.statistics.similar_count 
+                              : analysisResult.result.statistics.duplicate_count
+                            }
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {analysisType === 'ai' ? 'Similar Photos' : 'Duplicates'}
+                          </div>
+                        </div>
+                        <div className="p-4 border rounded-lg text-center">
+                          <div className="text-2xl font-bold text-green-600">
+                            {analysisResult.result.statistics.estimated_space_saved_mb.toFixed(1)} MB
+                          </div>
+                          <div className="text-sm text-muted-foreground">Space Saved</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+               </CardContent>
+               <CardFooter>
+                 <Button 
+                   onClick={() => setActiveTab("results")} 
+                   className="w-full"
+                 >
+                   Review Results
+                 </Button>
+               </CardFooter>
+             </Card>
+           </TabsContent>
 
-                                 {/* Analysis Controls */}
-                 <div className="flex gap-3 pt-4">
+           <TabsContent value="results" className="space-y-4">
+             <Card>
+               <CardHeader>
+                 <div className="flex items-center justify-between">
+                   <div>
+                     <CardTitle>
+                       {analysisType === 'ai' ? 'Similar Image' : 'Exact Duplicate'} Analysis Results
+                     </CardTitle>
+                     <CardDescription>
+                       {analysisResult && (
+                         <>
+                           Found {analysisType === 'ai' 
+                             ? analysisResult.result.statistics.similar_count 
+                             : analysisResult.result.statistics.duplicate_count
+                           } {analysisType === 'ai' ? 'similar photos' : 'duplicates'}, and{' '}
+                           {analysisResult.result.statistics.unique_count || 0} unique photos in {totalGroups} groups.
+                           {analysisResult.result.statistics.estimated_space_saved_mb > 0 && 
+                             ` You could save ${analysisResult.result.statistics.estimated_space_saved_mb.toFixed(1)} MB of space.`
+                           }
+                         </>
+                       )}
+                     </CardDescription>
+                   </div>
+
                    <Button 
-                     onClick={handleStartAnalysis}
-                     disabled={isAnalyzing || uploadedPhotos.length === 0}
-                     className="flex-1"
-                   >
-                     {isAnalyzing ? (
-                       <>
-                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                         Analyzing...
-                       </>
-                     ) : (
-                       <>
-                         <Zap className="h-4 w-4 mr-2" />
-                         Start Analysis
-                       </>
-                     )}
-                   </Button>
-                   
-                   {/* Re-upload Button */}
-                   <Button 
-                     variant="outline"
-                     onClick={resetDashboard}
-                     disabled={isAnalyzing || isResetting}
+                     variant="outline" 
+                     size="sm"
+                     onClick={handleStartOver}
+                     disabled={isAnalyzing || isResetting || isStartingOver}
                      className="gap-2"
                    >
-                     {isResetting ? (
+                     {isStartingOver ? (
                        <>
                          <Loader2 className="h-4 w-4 animate-spin" />
-                         Resetting...
+                         Starting Over...
                        </>
                      ) : (
                        <>
                          <RotateCcw className="h-4 w-4" />
-                         Re-upload
+                         Start Over
                        </>
                      )}
                    </Button>
                  </div>
-
-                {isAnalyzing && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Processing photos...</span>
-                      <span>{analysisProgress}%</span>
-                    </div>
-                    <Progress value={analysisProgress} className="w-full" />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="processing" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5" />
-                  AI Analysis Complete
-                </CardTitle>
-                <CardDescription>
-                  Your photos have been analyzed by our AI
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                                 {analysisResult && (
-                   <div className="space-y-4">
-                     <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700">
-                       <Check className="h-5 w-5" />
-                       <span>Analysis completed successfully!</span>
-                     </div>
-                     
-                     {/* Analysis Type Info */}
-                     <div className="p-4 border rounded-lg bg-gray-50">
-                       <div className="flex items-center justify-between">
-                         <div className="flex items-center gap-2">
-                           <Brain className="h-5 w-5 text-gray-600" />
-                           <span className="font-medium">Analysis Type Used:</span>
-                         </div>
-                         <div className="flex items-center gap-2">
-                           <div className={`w-3 h-3 rounded-full ${analysisType === 'ai' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
-                           <span className="font-medium">
-                             {analysisType === 'ai' ? 'AI-Powered Analysis' : 'Pixel-Perfect Analysis'}
-                           </span>
-                         </div>
-                       </div>
-                       <p className="text-sm text-muted-foreground mt-2">
-                         {analysisType === 'ai' 
-                           ? 'Used AI to find similar images based on visual content and features'
-                           : 'Found exact pixel-perfect duplicates only'
-                         }
-                       </p>
-                     </div>
-                     
-                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                       <div className="p-4 border rounded-lg text-center">
-                         <div className="text-2xl font-bold text-primary">
-                           {analysisResult.result.statistics.total_images}
-                         </div>
-                         <div className="text-sm text-muted-foreground">Total Photos</div>
-                       </div>
-                       <div className="p-4 border rounded-lg text-center">
-                         <div className="text-2xl font-bold text-blue-600">
-                           {analysisResult.result.statistics.total_groups}
-                         </div>
-                         <div className="text-sm text-muted-foreground">Groups Found</div>
-                       </div>
-                       <div className="p-4 border rounded-lg text-center">
-                         <div className="text-2xl font-bold text-orange-600">
-                           {analysisType === 'ai' 
-                             ? analysisResult.result.statistics.similar_count 
-                             : analysisResult.result.statistics.duplicate_count
-                           }
-                         </div>
-                         <div className="text-sm text-muted-foreground">
-                           {analysisType === 'ai' ? 'Similar Photos' : 'Duplicates'}
-                         </div>
-                       </div>
-                       <div className="p-4 border rounded-lg text-center">
-                         <div className="text-2xl font-bold text-green-600">
-                           {analysisResult.result.statistics.estimated_space_saved_mb.toFixed(1)} MB
-                         </div>
-                         <div className="text-sm text-muted-foreground">Space Saved</div>
-                       </div>
-                     </div>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                 {totalGroups === 0 ? (
+                   <div className="text-center py-8">
+                     <p className="text-muted-foreground">
+                       No {analysisType === 'ai' ? 'similar photos' : 'duplicates'} found!
+                     </p>
+                     <p className="text-sm text-muted-foreground mt-2">
+                       All your photos appear to be unique.
+                     </p>
                    </div>
+                 ) : (
+                   <>
+                     {/* Progress indicator and sorting info */}
+                     <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-4">
+                         <span className="text-sm text-muted-foreground">
+                           Group {currentGroupIndex + 1} of {totalGroups}
+                         </span>
+                         <span className="text-xs text-muted-foreground">
+                           Sorted by: {analysisType === 'ai' ? 'Similar' : 'Duplicate'} groups first, then by size
+                         </span>
+                       </div>
+                       <div className="flex gap-2">
+                         {[...Array(totalGroups)].map((_, i) => (
+                           <div
+                             key={i}
+                             className={`w-2 h-2 rounded-full ${
+                               i === currentGroupIndex ? 'bg-primary' : 'bg-muted'
+                             }`}
+                           />
+                         ))}
+                       </div>
+                     </div>
+
+                     {/* Group content */}
+                     {currentGroup && (
+                       <div className="space-y-4">
+                         <div className="flex items-center justify-between">
+                           <div>
+                             <div className="flex items-center gap-2 mb-1">
+                               <h4 className="font-medium">
+                                 Group {currentGroupIndex + 1} - {currentGroup.type}
+                               </h4>
+                               {/* Priority indicator */}
+                               {currentGroup.type !== 'unique' && (
+                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                   currentGroup.count >= 5 
+                                     ? 'bg-red-100 text-red-700' 
+                                     : currentGroup.count >= 3 
+                                       ? 'bg-orange-100 text-orange-700'
+                                       : 'bg-yellow-100 text-yellow-700'
+                                 }`}>
+                                   {currentGroup.count >= 5 ? 'High Priority' : 
+                                    currentGroup.count >= 3 ? 'Medium Priority' : 'Low Priority'}
+                                 </span>
+                               )}
+                             </div>
+                             <p className="text-sm text-muted-foreground">
+                               {currentGroup.type === 'unique' 
+                                 ? '1 unique photo found'
+                                 : `${currentGroup.count} ${analysisType === 'ai' ? 'similar' : 'duplicate'} photos found (${(currentGroup.similarity_score * 100).toFixed(0)}% similar)`
+                               }
+                             </p>
+                           </div>
+                           <div className="flex gap-2">
+                             <Button 
+                               variant="outline" 
+                               size="sm" 
+                               onClick={handleSelectAllInGroup}
+                             >
+                               Select All
+                             </Button>
+                             <Button 
+                               variant="outline" 
+                               size="sm" 
+                               onClick={handleClearAllInGroup}
+                             >
+                               Clear All
+                             </Button>
+                           </div>
+                         </div>
+
+                         {/* Best photo indicator */}
+                         <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                           <p className="text-sm text-green-700">
+                             <strong>Recommended:</strong> {currentGroup.best_image.filename} 
+                             (highest quality in this group - {(currentGroup.best_image.quality.overall_score * 100).toFixed(0)}% quality score)
+                           </p>
+                         </div>
+
+                         {/* Photos grid */}
+                         <div className="grid gap-4 md:grid-cols-3">
+                           {currentGroup.images.map((photo) => (
+                             <div key={photo.path} className="relative group">
+                               <div className="relative">
+                                 <img
+                                   src={apiService.getImageUrl(analysisResult!.session_id, photo.path, user?.id)}
+                                   alt={photo.filename}
+                                   className="w-full h-auto max-h-64 object-contain rounded-lg"
+                                 />
+                                 <div className="absolute top-2 right-2">
+                                   <input
+                                     type="checkbox"
+                                     className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                     checked={selectedPhotos.has(photo.path)}
+                                     onChange={(e) => handlePhotoSelection(photo.path, e.target.checked)}
+                                   />
+                                 </div>
+                                 {currentGroup.best_image.path === photo.path && (
+                                   <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs">
+                                     Best
+                                   </div>
+                                 )}
+                               </div>
+                               <div className="mt-2">
+                                 <p className="text-xs text-muted-foreground">
+                                   {(photo.file_size / (1024 * 1024)).toFixed(1)} MB • {(photo.quality.overall_score * 100).toFixed(0)}% quality
+                                 </p>
+                               </div>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+                   </>
                  )}
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={() => setActiveTab("results")} 
-                  className="w-full"
-                >
-                  Review Results
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="results" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>
-                      {analysisType === 'ai' ? 'Similar Image' : 'Exact Duplicate'} Analysis Results
-                    </CardTitle>
-                    <CardDescription>
-                      {analysisResult && (
-                        <>
-                          Found {analysisType === 'ai' 
-                            ? analysisResult.result.statistics.similar_count 
-                            : analysisResult.result.statistics.duplicate_count
-                          } {analysisType === 'ai' ? 'similar photos' : 'duplicates'}, and{' '}
-                          {analysisResult.result.statistics.unique_count || 0} unique photos in {totalGroups} groups.
-                          {analysisResult.result.statistics.estimated_space_saved_mb > 0 && 
-                            ` You could save ${analysisResult.result.statistics.estimated_space_saved_mb.toFixed(1)} MB of space.`
-                          }
-                        </>
-                      )}
-                    </CardDescription>
-                  </div>
-
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleStartOver}
-                    disabled={isAnalyzing || isResetting || isStartingOver}
-                    className="gap-2"
-                  >
-                    {isStartingOver ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Starting Over...
-                      </>
-                    ) : (
-                      <>
-                        <RotateCcw className="h-4 w-4" />
-                        Start Over
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {totalGroups === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">
-                      No {analysisType === 'ai' ? 'similar photos' : 'duplicates'} found!
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      All your photos appear to be unique.
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Progress indicator and sorting info */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm text-muted-foreground">
-                          Group {currentGroupIndex + 1} of {totalGroups}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Sorted by: {analysisType === 'ai' ? 'Similar' : 'Duplicate'} groups first, then by size
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        {[...Array(totalGroups)].map((_, i) => (
-                          <div
-                            key={i}
-                            className={`w-2 h-2 rounded-full ${
-                              i === currentGroupIndex ? 'bg-primary' : 'bg-muted'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Group content */}
-                    {currentGroup && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-medium">
-                                Group {currentGroupIndex + 1} - {currentGroup.type}
-                              </h4>
-                              {/* Priority indicator */}
-                              {currentGroup.type !== 'unique' && (
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  currentGroup.count >= 5 
-                                    ? 'bg-red-100 text-red-700' 
-                                    : currentGroup.count >= 3 
-                                      ? 'bg-orange-100 text-orange-700'
-                                      : 'bg-yellow-100 text-yellow-700'
-                                }`}>
-                                  {currentGroup.count >= 5 ? 'High Priority' : 
-                                   currentGroup.count >= 3 ? 'Medium Priority' : 'Low Priority'}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {currentGroup.type === 'unique' 
-                                ? '1 unique photo found'
-                                : `${currentGroup.count} ${analysisType === 'ai' ? 'similar' : 'duplicate'} photos found (${(currentGroup.similarity_score * 100).toFixed(0)}% similar)`
-                              }
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={handleSelectAllInGroup}
-                            >
-                              Select All
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={handleClearAllInGroup}
-                            >
-                              Clear All
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Best photo indicator */}
-                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                          <p className="text-sm text-green-700">
-                            <strong>Recommended:</strong> {currentGroup.best_image.filename} 
-                            (highest quality in this group - {(currentGroup.best_image.quality.overall_score * 100).toFixed(0)}% quality score)
-                          </p>
-                        </div>
-
-                        {/* Photos grid */}
-                        <div className="grid gap-4 md:grid-cols-3">
-                          {currentGroup.images.map((photo) => (
-                            <div key={photo.path} className="relative group">
-                              <div className="relative">
-                                <img
-                                  src={apiService.getImageUrl(analysisResult!.session_id, photo.path, user?.id)}
-                                  alt={photo.filename}
-                                  className="w-full h-auto max-h-64 object-contain rounded-lg"
-                                />
-                                <div className="absolute top-2 right-2">
-                                  <input
-                                    type="checkbox"
-                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                    checked={selectedPhotos.has(photo.path)}
-                                    onChange={(e) => handlePhotoSelection(photo.path, e.target.checked)}
-                                  />
-                                </div>
-                                {currentGroup.best_image.path === photo.path && (
-                                  <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs">
-                                    Best
-                                  </div>
-                                )}
-                              </div>
-                              <div className="mt-2">
-                                <p className="text-xs text-muted-foreground">
-                                  {(photo.file_size / (1024 * 1024)).toFixed(1)} MB • {(photo.quality.overall_score * 100).toFixed(0)}% quality
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button 
-                  variant="outline" 
-                  onClick={goToPreviousGroup}
-                  disabled={currentGroupIndex === 0}
-                  className="gap-2"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous Group
-                </Button>
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm text-muted-foreground flex items-center">
-                    {selectedPhotos.size} photos selected
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleDownloadBestPhotos}
-                    className="gap-2"
-                  >
-                    <Star className="h-4 w-4" />
-                    Download Best Photos Only
-                  </Button>
-                  {currentGroupIndex === totalGroups - 1 && (
-                    <Button onClick={handleDownloadSelected}>
-                      Download Selected Photos
-                    </Button>
-                  )}
-                  {currentGroupIndex < totalGroups - 1 && (
-                    <Button onClick={goToNextGroup} className="gap-2">
-                      Next Group
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
-      
-      <Footer />
-    </div>
-  )
+               </CardContent>
+               <CardFooter className="flex justify-between">
+                 <Button 
+                   variant="outline" 
+                   onClick={goToPreviousGroup}
+                   disabled={currentGroupIndex === 0}
+                   className="gap-2"
+                 >
+                   <ChevronLeft className="h-4 w-4" />
+                   Previous Group
+                 </Button>
+                 <div className="flex flex-col gap-1">
+                   <span className="text-sm text-muted-foreground flex items-center">
+                     {selectedPhotos.size} photos selected
+                   </span>
+                 </div>
+                 <div className="flex gap-2">
+                   <Button 
+                     variant="outline" 
+                     onClick={handleDownloadBestPhotos}
+                     className="gap-2"
+                   >
+                     <Star className="h-4 w-4" />
+                     Download Best Photos Only
+                   </Button>
+                   {currentGroupIndex === totalGroups - 1 && (
+                     <Button onClick={handleDownloadSelected}>
+                       Download Selected Photos
+                     </Button>
+                   )}
+                   {currentGroupIndex < totalGroups - 1 && (
+                     <Button onClick={goToNextGroup} className="gap-2">
+                       Next Group
+                       <ChevronRight className="h-4 w-4" />
+                     </Button>
+                   )}
+                 </div>
+               </CardFooter>
+             </Card>
+           </TabsContent>
+         </Tabs>
+       </main>
+       
+       <Footer />
+     </div>
+   )
 }
