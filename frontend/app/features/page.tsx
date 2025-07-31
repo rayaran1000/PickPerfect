@@ -24,7 +24,7 @@ export default function FeaturesPage() {
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
           
-          <div className="container relative py-20 md:py-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative py-20 md:py-32">
             <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-12 text-center">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
@@ -74,7 +74,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* Core Features Section */}
-        <section className="container py-20 md:py-32">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Core Features</h2>
@@ -208,7 +208,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* Advanced Features Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Advanced Features</h2>
@@ -324,7 +324,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* Technical Specifications */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Technical Specifications</h2>
@@ -377,7 +377,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* Comparison Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-4xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Why PickPerfect Stands Out</h2>
@@ -465,7 +465,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* Final CTA Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-4xl text-center">
             <div className="space-y-6">
               <h2 className="text-4xl font-bold mb-4">Ready to Experience These Features?</h2>

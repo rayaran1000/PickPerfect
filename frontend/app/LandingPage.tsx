@@ -23,7 +23,7 @@ export default function LandingPage() {
           {/* Background Image with Theme Support */}
           <BackgroundImage />
           
-          <div className="container relative py-20 md:py-32 lg:py-40 w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative py-20 md:py-32 lg:py-40 w-full">
             <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-12 text-center">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm border border-white/50 text-sm font-medium text-gray-900 shadow-lg">
@@ -95,7 +95,7 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section */}
-        <section className="container py-20 md:py-32">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Why Choose PickPerfect?</h2>
@@ -151,7 +151,7 @@ export default function LandingPage() {
         </section>
 
         {/* How it Works Section */}
-        <section className="container py-20 md:py-32">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">How It Works</h2>
@@ -193,7 +193,7 @@ export default function LandingPage() {
         </section>
 
         {/* Analysis Modes Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Two Powerful Analysis Modes</h2>
@@ -246,7 +246,7 @@ export default function LandingPage() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="container py-20 md:py-32">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Loved by Photographers</h2>
@@ -305,7 +305,7 @@ export default function LandingPage() {
         </section>
 
         {/* FAQ Section */}
-        <section className="container py-20 md:py-32">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="mx-auto max-w-5xl">
             <div className="flex items-center gap-3 mb-12">
               <List className="h-6 w-6 text-primary" />
@@ -325,11 +325,11 @@ export default function LandingPage() {
                   },
                   {
                     question: "Is my data secure?",
-                    answer: "Yes! Your photos are processed locally and never permanently stored on our servers. All files are automatically cleaned up after your session ends, ensuring complete privacy and security."
+                    answer: "Yes! Your photos are processed locally and never permanently stored on our servers. All files are automatically cleaned up after your session ends on signout, ensuring complete privacy and security."
                   },
                   {
                     question: "What happens to my photos when I leave the dashboard?",
-                    answer: "All uploaded photos and analysis data are automatically deleted when you leave the dashboard or refresh the page. This ensures your privacy and prevents any personal data from being stored on our servers."
+                    answer: "All uploaded photos and analysis data are automatically deleted when you refresh the dashboard page. This ensures your privacy and prevents any personal data from being stored on our servers."
                   },
                   {
                     question: "What's the difference between exact duplicates and similar images?",
@@ -359,7 +359,7 @@ export default function LandingPage() {
 
         {/* Final CTA Section */}
         {!user && (
-        <section className="container py-20 md:py-32">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="mx-auto max-w-4xl text-center">
                 <div className="text-center space-y-4">
                 <h2 className="text-4xl font-bold mb-4">Ready to Transform Your Photo Library?</h2>

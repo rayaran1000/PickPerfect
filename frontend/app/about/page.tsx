@@ -36,7 +36,7 @@ export default function AboutPage() {
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
           
-          <div className="container relative py-20 md:py-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative py-20 md:py-32">
             <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-12 text-center">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
@@ -62,7 +62,7 @@ export default function AboutPage() {
         </section>
 
         {/* Developer Section */}
-        <section className="container py-20 md:py-32">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Meet the Developer</h2>
@@ -127,7 +127,7 @@ export default function AboutPage() {
         </section>
 
         {/* Project Story Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">The PickPerfect Story</h2>
@@ -180,7 +180,7 @@ export default function AboutPage() {
         </section>
 
         {/* Technology Stack Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Technology Stack</h2>
@@ -234,7 +234,7 @@ export default function AboutPage() {
         </section>
 
         {/* Development Philosophy Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-4xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Development Philosophy</h2>
@@ -284,7 +284,7 @@ export default function AboutPage() {
         </section>
 
         {/* Future Vision Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Future Vision</h2>
@@ -328,7 +328,7 @@ export default function AboutPage() {
         </section>
 
         {/* Contact Developer Section */}
-        <section className="container py-20 md:py-32 border-t">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-t">
           <div className="mx-auto max-w-4xl text-center">
             <div className="space-y-6">
               <h2 className="text-3xl font-bold mb-4">Get in Touch</h2>

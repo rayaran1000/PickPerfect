@@ -590,7 +590,7 @@ export default function UserDashboard() {
         </div>
       </div>
       
-      <main className="flex-1 container py-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Session Information */}
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start gap-2">
