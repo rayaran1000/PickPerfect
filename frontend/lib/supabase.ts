@@ -5,7 +5,14 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholde
 
 // Only create client if we have valid credentials
 export const supabase = supabaseUrl !== 'https://placeholder.supabase.co' 
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    })
   : null
 
 // Helper function to check if Supabase is configured
