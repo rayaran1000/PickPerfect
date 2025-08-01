@@ -67,6 +67,7 @@ export default function UserDashboard() {
   const [showResetMessage, setShowResetMessage] = useState(false) // Add reset message state
   const [isResetting, setIsResetting] = useState(false) // Add reset loading state
   const [isStartingOver, setIsStartingOver] = useState(false) // Add start over loading state
+  const [showPhotoCountError, setShowPhotoCountError] = useState(false) // Add validation error state
 
   // Get user info from Google OAuth using the correct structure
   const userEmail = user?.email
@@ -135,10 +136,18 @@ export default function UserDashboard() {
 
   const handleLocalPhotosChange = useCallback((photos: UploadedPhoto[]) => {
     setLocalPhotos(photos)
+    // Clear photo count error when photos are added
+    if (photos.length > 0) {
+      setShowPhotoCountError(false)
+    }
   }, [])
 
   const handleDrivePhotosChange = useCallback((photos: UploadedPhoto[]) => {
     setDrivePhotos(photos)
+    // Clear photo count error when photos are added
+    if (photos.length > 0) {
+      setShowPhotoCountError(false)
+    }
   }, [])
 
   const handleAnalysisComplete = (result: AnalysisResult) => {
@@ -308,8 +317,18 @@ export default function UserDashboard() {
   }, [user?.id, uploadedPhotos])
 
   const handleStartAnalysis = async () => {
+    // Clear any previous error messages
+    setShowPhotoCountError(false)
+    
     if (!user?.id || uploadedPhotos.length === 0) {
       console.error('No user or photos to analyze')
+      return
+    }
+
+    // Check if user has uploaded more than 1 photo
+    if (uploadedPhotos.length === 1) {
+      setShowPhotoCountError(true)
+      console.error('At least 2 photos are required for analysis. Please re upload')
       return
     }
 
@@ -407,6 +426,7 @@ export default function UserDashboard() {
       setIsAnalyzing(false)
       setAnalysisProgress(0)
       setShowPreviewPage(false)
+      setShowPhotoCountError(false) // Clear photo count error
       setResetKey(prev => prev + 1) // Increment reset key to trigger component resets
       
       // Show reset success message
@@ -833,6 +853,11 @@ export default function UserDashboard() {
                   </CardTitle>
                   <CardDescription>
                     Review your {uploadedPhotos.length} photos before starting analysis
+                    {uploadedPhotos.length === 1 && (
+                      <span className="block text-sm text-amber-600 mt-1">
+                        ⚠️ At least 2 photos are required for analysis. Please re upload
+                      </span>
+                    )}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -856,11 +881,30 @@ export default function UserDashboard() {
                     ))}
                   </div>
 
-                                  {/* Analysis Controls */}
+                                  {/* Photo Count Error Message */}
+                  {showPhotoCountError && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <div className="flex-shrink-0 mt-0.5">
+                          <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-red-700">
+                            <strong>Analysis requires multiple photos:</strong> You have uploaded {uploadedPhotos.length} photo. 
+                            Please upload at least 2 photos to start the analysis. Use the "Re-upload" button to add more photos.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Analysis Controls */}
                   <div className="flex gap-3 pt-4">
                     <Button 
                       onClick={handleStartAnalysis}
-                      disabled={isAnalyzing || uploadedPhotos.length === 0}
+                      disabled={isAnalyzing || uploadedPhotos.length === 0 || uploadedPhotos.length === 1}
                       className="flex-1"
                     >
                       {isAnalyzing ? (
