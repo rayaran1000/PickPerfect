@@ -1035,7 +1035,7 @@ export default function UserDashboard() {
                      ) : (
                        <>
                          <RotateCcw className="h-4 w-4" />
-                         Start Over
+                         Clean photos & Start Over
                        </>
                      )}
                    </Button>
