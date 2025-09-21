@@ -1,6 +1,6 @@
 # PickPerfect - AI-Powered Photo Organization
 
-<!-- Uploading "image.png"... -->
+<img width="825" height="547" alt="Image" src="https://github.com/user-attachments/assets/a8fc5389-2b5c-4171-bfd2-953f2b8baad9" />
 
 A web-based application that uses AI to help you organize and clean up your photo library by finding duplicates and similar images.
 
